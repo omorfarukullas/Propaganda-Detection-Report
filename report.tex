@@ -1,0 +1,1889 @@
+% =====================================================================
+% A Multimodal AI Framework for Detecting Coordinated Propaganda
+% in Bangla Online Media Content
+% B.Sc. in CSE, United International University (UIU)
+% Compile with:  xelatex report.tex   (run twice for cross-references)
+% =====================================================================
+\documentclass[12pt,a4paper]{report}
+
+% ---------- Fonts & Engine Compatibility (XeLaTeX or pdfLaTeX) ----------
+\usepackage{iftex}
+\ifXeTeX
+  \usepackage{fontspec}
+  \setmainfont{TeX Gyre Termes}[Ligatures=TeX]
+  \setsansfont{TeX Gyre Heros}[Ligatures=TeX]
+  \setmonofont{TeX Gyre Cursor}[Scale=0.9]
+  % Bangla text (used in UI mock-up)
+  \newfontfamily\banglafont{FreeSerif}
+  \newcommand{\bn}[1]{{\banglafont #1}}
+\else
+  \usepackage[T1]{fontenc}
+  \usepackage[utf8]{inputenc}
+  \usepackage{tgtermes}
+  \usepackage{tgheros}
+  \usepackage{tgcursor}
+  \newcommand{\bn}[1]{[Bangla text: \textit{ekhane bangla social media post ba khobor likhun\dots}]}
+\fi
+
+% ---------- Layout ----------
+\usepackage[a4paper,left=1.5in,right=1in,top=1in,bottom=1in,headheight=15pt]{geometry}
+\usepackage{setspace}
+\onehalfspacing
+\usepackage{fancyhdr}
+\usepackage{titlesec}
+\usepackage{enumitem}
+\setlist{itemsep=2pt,topsep=4pt}
+\usepackage{caption}
+\captionsetup{font=small,labelfont=bf,skip=6pt}
+\usepackage{float}
+\usepackage{adjustbox}   % put next to \usepackage{float}
+\usepackage{pdflscape}
+
+% ---------- Tables ----------
+\usepackage{array}
+\usepackage{booktabs}
+\usepackage{longtable}
+\usepackage{tabularx}
+\usepackage{multirow}
+\usepackage{makecell}
+\usepackage{ragged2e}
+\newcolumntype{L}[1]{>{\RaggedRight\arraybackslash}p{#1}}
+\newcolumntype{C}[1]{>{\Centering\arraybackslash}p{#1}}
+
+% ---------- Math, symbols, colour ----------
+\usepackage{amsmath,amssymb}
+\usepackage{xcolor}
+\definecolor{uiublue}{RGB}{0,51,102}
+\definecolor{boxfill}{RGB}{232,240,250}
+\definecolor{boxdraw}{RGB}{0,51,102}
+\definecolor{storefill}{RGB}{255,244,214}
+\definecolor{procfill}{RGB}{225,242,232}
+\definecolor{extfill}{RGB}{244,228,228}
+
+% ---------- Diagrams ----------
+\usepackage{tikz}
+\usetikzlibrary{arrows.meta,positioning,shapes.geometric,shapes.misc,fit,backgrounds,calc}
+\usepackage{pgfgantt}
+
+% ---------- Code / mock-ups ----------
+\usepackage{listings}
+\lstset{basicstyle=\ttfamily\footnotesize,breaklines=true,frame=single,
+  columns=fullflexible,keepspaces=true,xleftmargin=0pt,framexleftmargin=4pt}
+
+% ---------- Bibliography & links ----------
+\usepackage[numbers,sort&compress]{natbib}
+\usepackage[hidelinks,bookmarks=true]{hyperref}
+\usepackage{url}
+\urlstyle{same}
+
+% ---------- Headers ----------
+\pagestyle{fancy}
+\fancyhf{}
+\fancyhead[L]{\small\itshape Bangla Propaganda Detection Framework}
+\fancyhead[R]{\small\thepage}
+\renewcommand{\headrulewidth}{0.4pt}
+\fancypagestyle{plain}{\fancyhf{}\fancyfoot[C]{\thepage}\renewcommand{\headrulewidth}{0pt}}
+
+% ---------- Chapter/section styling ----------
+\titleformat{\chapter}[display]
+  {\normalfont\huge\bfseries\color{uiublue}}
+  {\chaptertitlename\ \thechapter}{14pt}{\Huge}
+\titlespacing*{\chapter}{0pt}{-20pt}{24pt}
+\titleformat{\section}{\normalfont\Large\bfseries\color{uiublue}}{\thesection}{0.8em}{}
+\titleformat{\subsection}{\normalfont\large\bfseries}{\thesubsection}{0.8em}{}
+\titleformat{\subsubsection}{\normalfont\normalsize\bfseries\itshape}{\thesubsubsection}{0.8em}{}
+
+% ---------- Convenience macros ----------
+\newcommand{\ck}{$\checkmark$}
+\newcommand{\ttl}{A Multimodal AI Framework for Detecting Coordinated Propaganda in Bangla Online Media Content}
+
+% ---------- TikZ styles shared by all figures ----------
+\tikzset{
+  >=Stealth,
+  ext/.style   ={rectangle,draw=boxdraw,fill=extfill,rounded corners=2pt,
+                 minimum height=12mm,text width=24mm,inner sep=3pt,align=center,font=\scriptsize},
+  proc/.style  ={rectangle,draw=boxdraw,fill=procfill,rounded corners=3pt,
+                 minimum height=12mm,text width=24mm,inner sep=3pt,align=center,font=\scriptsize},
+  blk/.style   ={rectangle,draw=boxdraw,fill=boxfill,rounded corners=3pt,
+                 minimum height=12mm,text width=24mm,inner sep=3pt,align=center,font=\scriptsize},
+  store/.style ={rectangle,draw=boxdraw,fill=storefill,
+                 minimum height=12mm,text width=24mm,inner sep=3pt,align=center,font=\scriptsize},
+  flow/.style  ={->,thick,draw=boxdraw!80!black},
+  dflow/.style ={->,thick,dashed,draw=boxdraw!80!black},
+  line/.style  ={thick,draw=boxdraw!80!black},
+  lab/.style   ={font=\scriptsize,inner sep=1.5pt,align=center,text=black},
+  grp/.style   ={draw=boxdraw!60,dashed,thick,rounded corners=4pt},
+  grptitle/.style={font=\scriptsize\bfseries,text=boxdraw,inner sep=2pt}
+}
+
+\hypersetup{pdftitle={\ttl},pdfauthor={Group 262-037, UIU}}
+
+\begin{document}
+
+% =====================================================================
+%                              TITLE PAGE
+% =====================================================================
+\begin{titlepage}
+\thispagestyle{empty}
+\centering
+{\Large\bfseries\color{uiublue} United International University\par}
+\vspace{2pt}
+{\large Department of Computer Science and Engineering\par}
+\vspace{1.4cm}
+{\LARGE\bfseries\color{uiublue}\ttl\par}
+\vspace{1.4cm}
+{\large A Final Year Design Project (FYDP) Report submitted in partial fulfillment of the
+requirements for the degree of\par}
+\vspace{6pt}
+{\large\bfseries Bachelor of Science in Computer Science and Engineering\par}
+\vspace{1.2cm}
+{\large\bfseries Submitted by\par}
+\vspace{6pt}
+\begin{tabular}{l c}
+Shekh Abdullah Al Mehedi & ID: 112231075\\[3pt]
+Mahjabin Khan & ID: 112230177\\[3pt]
+Omor Faruck Ullas & ID: 112310384\\[3pt]
+Md.\ Rayan Rahman & ID: 112331071
+\end{tabular}
+\vspace{1.2cm}
+
+{\large\bfseries Group: 262-037\par}
+\vspace{1cm}
+{\large\bfseries Supervisor\par}
+\vspace{4pt}
+{\large Dr.\ Jannatun Noor Mukta\par}
+\vfill
+{\large Dhaka, Bangladesh\par}
+{\large September 2026\par}
+\end{titlepage}
+
+\pagenumbering{roman}
+
+% =====================================================================
+%                              ABSTRACT
+% =====================================================================
+\chapter*{Executive Summary and Abstract}
+\addcontentsline{toc}{chapter}{Executive Summary and Abstract}
+
+Bangladesh's digital media ecosystem has experienced exponential expansion,
+currently hosting over 77.7~million internet users and 60.0~million social media
+user identities. While digital platforms democratize information exchange, they
+also serve as critical conduits for strategic, coordinated propaganda campaigns
+aimed at shaping public opinion and destabilizing civic discourse. Traditional
+automated propaganda detection architectures predominantly focus on high-resource
+languages (e.g., English) and evaluate isolated, text-only posts. In contrast,
+under-resourced languages like Bangla lack comprehensive multimodal annotated
+corpora, fine-grained persuasive technique taxonomies, and coordinated campaign
+detection systems.
+
+This report presents the design and architectural methodology of a
+\textbf{Multimodal AI Framework for Detecting Coordinated Propaganda in Bangla
+Online Media Content}. The proposed framework unites:
+\begin{enumerate}
+  \item A hybrid human-in-the-loop annotation pipeline utilizing Large Language
+        Models (LLMs) for pre-annotation and domain experts for ground-truth
+        verification.
+  \item An extensible multimodal classification pipeline comparing classical
+        machine learning baselines with specialized transformer architectures
+        (BanglaBERT and XLM-RoBERTa).
+  \item Coordinated campaign detection modules integrating semantic
+        representations, temporal posting patterns, and network-level interaction
+        graphs.
+\end{enumerate}
+
+\clearpage
+\tableofcontents
+\clearpage
+\listoffigures
+\clearpage
+\listoftables
+\clearpage
+\pagenumbering{arabic}
+
+% =====================================================================
+%                            CHAPTER 1
+% =====================================================================
+\chapter{Introduction}
+\label{ch:intro}
+
+This chapter presents an overview of the proposed research on coordinated
+propaganda detection in Bangla digital media. It outlines the project background,
+problem statement, core motivation, research objectives, methodology, expected
+outcomes, and the structural organization of the report.
+
+\section{Project Overview}
+Bangladesh's digital media ecosystem has become a major source of information for
+millions of people, alongside continued growth in internet access and social media
+use. According to DataReportal's \emph{Digital 2025: Bangladesh}, the country had
+\textbf{77.7 million internet users} and \textbf{60.0 million social media user
+identities} in early 2025, demonstrating how strongly online platforms now shape
+news circulation and public opinion.
+
+Within this environment, \textbf{propaganda} refers to strategically crafted
+information designed to influence public attitudes, beliefs, or actions. In the
+digital age, such content is often spread through coordinated campaigns, repeated
+messaging, and networked amplification, making it more scalable and harder to
+detect than isolated misinformation. This issue is especially important in
+Bangladesh, where online platforms are deeply embedded in political communication,
+election-related discourse, and reactions to controversial events, all of which
+increase the potential impact of coordinated influence operations~\cite{hristakieva2022}.
+
+\subsection*{Problem Statement}
+Most automated propaganda detection systems to date have been developed for English
+and other languages with abundant digital resources. Bangla, by contrast, still
+lacks large annotated datasets and detection frameworks capable of identifying
+coordinated propaganda across text, images, and cross-platform activity, which
+leaves a substantial research and practical gap~\cite{hossain2020}. This project
+responds to that gap by proposing a Bangla propaganda dataset and an AI-based
+detection framework tailored to Bangladesh's online media environment. The goal is
+to support more accurate, scalable, and context-sensitive detection of coordinated
+propaganda campaigns in Bangla-language digital spaces~\cite{hossain2020,kamruzzaman2023}.
+
+\section{Motivation}
+The motivation for this project extends beyond building a detection system. In an
+increasingly digital society, people rely on online information to understand
+current events, form opinions, and make decisions that affect their communities and
+democratic processes. When coordinated propaganda manipulates information at scale,
+it can undermine public trust, distort discourse, and reduce people's ability to
+make informed judgments~\cite{hristakieva2022}.
+
+This project is grounded in the belief that individuals should be able to think
+independently rather than have their perceptions shaped by coordinated
+manipulation. Supporting that independence requires a digital environment in which
+misleading influence campaigns can be identified and examined more effectively.
+Technology alone cannot eliminate propaganda, but it can provide tools that improve
+transparency and help users evaluate online content more critically~\cite{ng2023}.
+
+From a research standpoint, the scarcity of Bangla-language resources for this task
+presents an opportunity. Existing Bangla work has already shown the value of
+annotated datasets and benchmark systems for low-resource language processing, and
+the same need extends to multimodal and propaganda-oriented settings. In this way,
+the project aims to contribute both to advances in AI research and to a more
+trustworthy online information ecosystem in Bangladesh~\cite{hossain2020}.
+
+\section{Objectives}
+The primary purpose of this research is to build a foundational AI framework and
+dataset for the Bangla digital media environment that can effectively detect and
+analyze coordinated propaganda campaigns~\cite{ng2023}.
+
+As this research is currently in its initial phase, the specific objectives are
+enumerated below:
+\begin{enumerate}
+  \item \textbf{Create a large-scale, multimodal Bangla dataset:} Compile and
+        annotate a comprehensive dataset spanning diverse domains, such as politics
+        and news, including both textual and visual elements, using hybrid
+        annotation pipelines that combine human expertise with LLM assistance to
+        scale the process efficiently~\cite{hossain2020}.
+  \item \textbf{Develop an AI model for propaganda detection:} Architect and train
+        a multimodal machine learning framework optimized for the linguistic
+        nuances of Bangla to classify manipulative and propagandistic
+        content~\cite{hossain2020}.
+  \item \textbf{Analyze coordinated campaigns:} Combine semantic, temporal, and
+        network-level signals to detect organized, scalable influence operations
+        rather than isolated pieces of misinformation~\cite{ng2023}.
+  \item \textbf{Evaluate model performance:} Conduct baseline evaluations against
+        current state-of-the-art models, such as fine-tuned transformers and
+        cross-lingual models, to assess accuracy, scalability, and
+        context-sensitivity in the Bangladeshi digital landscape~\cite{hossain2020}.
+  \item \textbf{Establish open resources for future research:} Make the annotated
+        dataset and architectural findings accessible to the academic community to
+        support further advances in NLP, multimodal machine learning, and digital
+        media analysis for low-resource languages~\cite{hossain2020}.
+\end{enumerate}
+
+\section{Methodology}
+\label{sec:method-overview}
+To achieve these objectives, the research follows a structured, multi-phase
+methodology. Figure~\ref{fig:workflow} presents the complete pipeline at a glance:
+raw Bangla content is ingested and normalized, passed through a hybrid
+LLM-plus-human annotation stage to yield a verified multimodal dataset, and then
+processed by three parallel analysis streams (text, visual, and network) whose
+outputs are combined by a cross-modal campaign-fusion head and delivered through a
+web dashboard and monitoring API.
+\begin{figure}[H]
+\centering
+\begin{adjustbox}{max width=\textwidth,max height=0.85\textheight}
+\begin{tikzpicture}[
+  wfn/.style={rectangle,draw=black!70,rounded corners=2pt,align=center,
+              font=\small,minimum height=13mm,text width=34mm,inner sep=4pt},
+  wfsrc/.style ={wfn,fill=gray!10},
+  wfproc/.style={wfn,fill=blue!7,minimum height=20mm},
+  wfsto/.style ={wfn,fill=green!8},
+  wfout/.style ={wfn,fill=orange!10,text width=55mm},
+  stl/.style={rotate=90,anchor=south,font=\scriptsize\bfseries,align=center,text width=30mm},
+  wfgrp/.style={draw=black!45,dashed,rounded corners=4pt,inner sep=8pt}
+]
+% ---- Stage 1
+\node[wfsrc] (src)   at (-4.6,0)    {\textbf{Bangla Digital Media Sources}\\[2pt]{\scriptsize Facebook \quad Twitter/X \quad News Outlets}};
+\node[wfsrc] (clean) at (0,0)       {\textbf{Data Cleaning}\\[2pt]{\scriptsize Unicode Normalization}};
+\node[wfsrc] (annot) at (4.6,0)     {\textbf{Hybrid Annotation Pipeline}\\[2pt]{\scriptsize LLM Pre-Annotation\\+ Human Verification}};
+\node[wfsto] (ds)    at (0,-2.4)    {\textbf{Verified Multimodal Dataset}};
+\draw[flow] (src) -- (clean);
+\draw[flow] (clean) -- (annot);
+\draw[flow] (annot.south) |- (ds.east);
+\node[wfgrp,fit=(src)(clean)(annot)(ds)] (st1) {};
+\node[stl] at (st1.west) {1.\ Ingestion \& Preprocessing};
+
+% ---- Stage 2
+\node[wfproc] (txt) at (-4.6,-6.2) {\textbf{Text Stream}\\[2pt]{\scriptsize BanglaBERT / XLM-R\\Semantic \& Persuasive Cue Modeling}};
+\node[wfproc] (vis) at (0,-6.2)    {\textbf{Visual Stream}\\[2pt]{\scriptsize ResNet / ViT\\Image--Text Alignment \& Meme Analysis}};
+\node[wfproc] (net) at (4.6,-6.2)  {\textbf{Network Stream}\\[2pt]{\scriptsize Temporal Clustering\\Coordinated Account Interaction Graphs}};
+\node[wfgrp,fit=(txt)(vis)(net)] (st2) {};
+\node[stl] at (st2.west) {2.\ Multimodal AI Framework};
+
+% bus: dataset -> three streams
+\draw[line] (ds.south) -- (0,-4.4);
+\draw[line] (-4.6,-4.4) -- (4.6,-4.4);
+\draw[flow] (-4.6,-4.4) -- (txt.north);
+\draw[flow] (0,-4.4)    -- (vis.north);
+\draw[flow] (4.6,-4.4)  -- (net.north);
+
+% ---- Stage 3
+\node[wfout] (fuse) at (0,-9.8)  {\textbf{Cross-Modal Campaign\\Fusion Head}};
+\node[wfout] (out)  at (0,-11.7) {\textbf{Propaganda Category}\\{\scriptsize Confidence \& Technique}};
+\node[wfout] (dash) at (0,-13.6) {\textbf{Web Dashboard}\\{\scriptsize \& Monitoring API}};
+\draw[flow] (fuse) -- (out);
+\draw[flow] (out) -- (dash);
+\node[wfgrp,fit=(fuse)(out)(dash)] (st3) {};
+\node[stl] at (st3.west) {3.\ Synthesis \& User Deployment};
+
+% bus: three streams -> fusion
+\draw[line] (txt.south) -- (-4.6,-8.4) -- (0,-8.4);
+\draw[line] (net.south) -- (4.6,-8.4)  -- (0,-8.4);
+\draw[flow] (vis.south) -- (fuse.north);
+\end{tikzpicture}
+\end{adjustbox}
+\caption{Overall workflow of the proposed Bangla propaganda detection framework.}
+\label{fig:workflow}
+\end{figure}
+
+The workflow proceeds through five core phases~\cite{ng2023}:
+\begin{itemize}
+  \item \textbf{Data Collection and Integration:} Raw data containing text and
+        visual elements across politics, sports, and entertainment is
+        systematically gathered using automated web scrapers and validated
+        manually.
+  \item \textbf{Data Cleaning and Preprocessing:} Unstructured text is cleaned,
+        standardized, tokenized, and normalized into machine-readable formats
+        tailored for Bangla NLP tasks.
+  \item \textbf{Dataset Annotation and Construction:} A hybrid pipeline uses LLMs
+        for initial pre-annotation and span extraction, followed by human expert
+        verification to ensure label quality and reduce
+        bias~\cite{hossain2020}.
+  \item \textbf{Multimodal Model Development:} Semantic features, temporal metrics,
+        and social network structure are fused to pinpoint coordinated campaigns
+        rather than standalone posts~\cite{ng2023}.
+  \item \textbf{Evaluation and Comparative Analysis:} Benchmarks are run against
+        transformer architectures and cross-lingual models to measure real-world
+        performance on Bangladeshi digital media contexts~\cite{hossain2020}.
+\end{itemize}
+
+\section{Project Outcome}
+By the end of this phase of the research, the project is expected to deliver the
+following major concrete outputs~\cite{hossain2020}:
+\begin{itemize}
+  \item An annotated multimodal Bangla propaganda dataset covering multiple public
+        domains.
+  \item A trained AI framework designed for detecting coordinated digital
+        propaganda.
+  \item A comprehensive baseline evaluation comparing the proposed architecture
+        against state-of-the-art models.
+  \item Openly available dataset resources and benchmarks to foster future NLP and
+        multimodal research for under-resourced languages~\cite{hristakieva2022}.
+\end{itemize}
+
+\section{Organization of the Report}
+The remainder of this report is organized as follows:
+\begin{itemize}
+  \item \textbf{Chapter~\ref{ch:background} (Background):} Presents the necessary
+        preliminaries, reviews similar applications and related research, and
+        identifies the research gaps relevant to coordinated propaganda detection
+        in Bangla online media.
+  \item \textbf{Chapter~\ref{ch:design} (Project Design):} Describes the project
+        requirements, context diagram, data flow diagrams, user interface design,
+        detailed methodology, project plan, and task allocation.
+  \item \textbf{Chapter~\ref{ch:standards} (Standards and Design Constraints):}
+        Discusses the standards followed, realistic design constraints, cost
+        analysis, and the mapping of the project to complex engineering problem
+        solving and activity criteria.
+\end{itemize}
+
+% =====================================================================
+%                            CHAPTER 2
+% =====================================================================
+\chapter{Background}
+\label{ch:background}
+
+This chapter provides the background knowledge needed to understand the proposed
+work and discusses existing applications and research related to propaganda,
+misinformation, and harmful-content detection. It also identifies the main research
+gaps that motivate the proposed system.
+
+\section{Preliminaries}
+Social media has become an important platform for sharing news, opinions, images,
+and other information. At the same time, it can also be used to spread propaganda,
+misinformation, hate speech, manipulation, and other harmful content. Because
+harmful information can spread very quickly, automatic detection systems are
+becoming increasingly important.
+
+\subsection{Propaganda}
+Propaganda is information designed to influence people's opinions or behavior, often
+by using selective information, emotional language, misleading presentation, or
+other persuasive techniques. In social media, propaganda can appear as text,
+images, videos, hashtags, or coordinated posts.
+
+\subsection{Misinformation and Harmful Content}
+Misinformation refers to incorrect or misleading information. Harmful online
+content is a broader term that can include hate speech, offensive language,
+harassment, manipulated information, and other content that may cause social harm.
+These types of content can be difficult to detect automatically because their
+meaning often depends on context.
+
+\subsection{Machine Learning for Content Detection}
+Machine learning (ML) allows a computer system to learn patterns from previously
+labeled examples. Traditional ML methods such as Support Vector Machines (SVM) have
+been widely used for text classification. More recent systems use deep learning and
+transformer-based language models to understand more complex language
+patterns~\cite{duridi2025,plikynas2025}.
+
+\subsection{Deep Learning and Transformer Models}
+Deep learning (DL) models can automatically learn useful features from data.
+Transformer-based models are particularly useful for language tasks because they
+can capture relationships between words over a long text. Models such as BERT and
+language models adapted to specific languages have therefore become common in
+harmful-content detection~\cite{duridi2025,lora2023,hasan2026}.
+
+\subsection{Graph-Based Detection}
+Graph-based approaches represent information as connected nodes and relationships.
+They are useful when the relationship between words, users, posts, or accounts is
+important. For example, propaganda can depend on relationships between different
+parts of a text rather than on individual words alone. Ahmad et al.\ used a
+hierarchical graph-based model to capture such relationships in propaganda
+detection~\cite{ahmad2025}.
+
+\subsection{Multimodal Detection}
+Social media posts often contain more than one type of information. A post may
+contain text and an image together. Multimodal detection combines these different
+sources of information to make a prediction. Research has shown that image
+information can provide important clues for fake-news and hateful-meme
+detection~\cite{lin2024,hee2022}.
+
+\subsection{Behavioral and Network Signals}
+The behavior of a social-media account can also provide useful information.
+Examples include how often an account posts, how it interacts with other users, and
+whether it participates in coordinated activity. These signals can be useful when
+the actual content is difficult to trust or is deliberately changed to avoid
+detection~\cite{declerck2024,sela2025,schneider2026}.
+
+\subsection{Low-Resource Languages}
+A low-resource language is a language for which relatively few labeled datasets,
+language models, or other computational resources are available. Bengali is an
+example where researchers have identified limitations in annotated datasets and
+language resources~\cite{lora2023,hasan2026,romim2022}. This makes harmful-content
+detection more challenging than in high-resource languages such as English.
+
+\section{Literature Review}
+The reviewed literature focuses on computational methods for detecting propaganda,
+misinformation, manipulation, hate speech, sarcasm, and related harmful content.
+The studies cover traditional machine learning, deep learning, graph models,
+transfer learning, multimodal methods, behavioral analysis, and large language
+models (LLMs)~\cite{duridi2025,plikynas2025,ahmad2025,schneider2026}.
+
+The literature can be divided into two areas: \textbf{similar applications} and
+\textbf{related academic research}.
+
+\subsection{Similar Applications}
+Several existing tools and systems address parts of the problem of detecting
+misinformation, manipulated information, or suspicious online activity. These
+systems show that automated analysis can be provided through web-based interfaces
+and APIs, although they do not necessarily perform exactly the same task as the
+proposed system.
+\begin{itemize}
+  \item \textbf{Bot-detection and Coordination Analysis Systems:} Some systems
+        focus on identifying automated or coordinated social-media accounts.
+        Research-based systems such as those discussed by De~Clerck et al.\ analyze
+        account behavior and coordination patterns to identify bot-like
+        activity~\cite{declerck2024}. These systems are related to the proposed work
+        because they show how user behavior can be used in addition to the content
+        of a post.
+  \item \textbf{Fact-checking Systems:} Fact-checking platforms and services allow
+        users or applications to check whether claims have already been reviewed.
+        Google provides Fact Check Tools that support searching and working with
+        fact-check information through an API~\cite{google_factcheck}. Google also
+        supports the \texttt{ClaimReview} format for representing fact-check
+        results in a structured way~\cite{google_claimreview}. Such systems are
+        related because they support verification of questionable information,
+        although fact-checking is different from automatically detecting
+        propaganda techniques.
+  \item \textbf{Social-media Misinformation Analysis:} Other applications and
+        research systems analyze how information spreads through social networks.
+        The work of Sela et al.\ shows that repetition patterns and network
+        structures can provide signals for identifying political influence in
+        information spread~\cite{sela2025}. These systems are relevant because they
+        demonstrate that harmful information can be analyzed at both the content
+        level and the network level.
+  \item \textbf{Limitations of Existing Applications:} A common limitation of
+        existing applications is that they often focus on one specific problem,
+        such as fact checking, bot detection, or misinformation analysis. A system
+        that combines these ideas with low-resource language and multimodal
+        analysis can address a broader set of challenges.
+\end{itemize}
+
+\subsection{Related Research}
+
+\subsubsection*{Propaganda Detection Using Machine Learning and Deep Learning}
+Traditional machine learning remains useful for some propaganda detection tasks.
+Duridi et al.\ found that SVM performed better than AraBERT for propaganda
+detection in their Arabic social-media dataset, while AraBERT performed better for
+bias detection~\cite{duridi2025}. This result shows that the most advanced model is
+not always the best model for every task.
+
+Ahmad et al.\ proposed a Hierarchical Graph-based Integration Network (H-GIN) for
+propaganda detection. The model uses graph-based information to capture long-range
+and non-adjacent relationships that can be missed by standard sequence models. The
+study reported an accuracy of 82\% for its evaluated task~\cite{ahmad2025}.
+
+These studies show that both traditional and advanced models can be useful. The
+choice of model depends on the task, the dataset, and the type of information that
+needs to be captured.
+
+\subsubsection*{Behavioral and Network-Based Detection}
+Recent research has moved beyond text-only detection. De~Clerck et al.\ studied
+coordinated and bot-like behavior on Twitter and showed that patterns of account
+activity can help identify suspicious behavior~\cite{declerck2024}.
+
+Sela et al.\ also found that repetition patterns and network structure can provide
+useful signals for identifying political influence in information
+spread~\cite{sela2025}.
+
+Schneider et al.\ further developed this idea by focusing on user behavior rather
+than only the content of posts. In their Reddit study, behavioral-policy
+representations achieved a macro-F1 of 94.9\%, compared with 91.2\% for text
+embeddings in the evaluated actor-detection task~\cite{schneider2026}.
+
+These studies suggest that user behavior and network structure can provide
+information that cannot be obtained from text alone.
+
+\subsubsection*{Low-Resource Language Detection}
+Low-resource languages face important challenges because of limited data and
+language resources. Haider et al.\ studied manipulation detection in low-resource
+languages and showed that transfer learning can help when only a small amount of
+training data is available in the target language~\cite{haider2020}.
+
+For Bengali, Lora et al.\ developed a transformer-based model for sarcasm
+detection. Their results differed across datasets, showing that model performance
+can depend strongly on the characteristics of the available corpus~\cite{lora2023}.
+
+Romim et al.\ introduced the BD-SHS benchmark dataset for Bangla hate-speech
+detection. The dataset contains manually annotated comments from different social
+contexts, and the study reported a best F1-score of 91.0\% for its evaluated
+system~\cite{romim2022}.
+
+More recent work by Hasan et al.\ introduced BanglaMultiHate, which considers
+several aspects of hate speech, including type, severity, and target. The study
+evaluated classical machine learning, BanglaBERT, and LLM-based
+approaches~\cite{hasan2026}.
+
+Together, these studies show that successful moderation in Bangla requires larger
+datasets, better annotation, and models that understand local language and social
+context.
+
+\subsubsection*{Multimodal Detection}
+Lin et al.\ proposed a text-image fusion model for fake-news detection. Their
+results demonstrate that combining text and image information can improve detection
+compared with using only one modality~\cite{lin2024}.
+
+Hee et al.\ studied multimodal hateful memes and found that images can provide
+important information for classification. However, they also observed that
+multimodal systems may learn unwanted biases and produce false
+positives~\cite{hee2022}.
+
+Wang et al.\ investigated image-based political propaganda and showed that visual
+elements such as colors can be used in different ways by political
+groups~\cite{wang2022}.
+
+These findings suggest that text-only systems may miss important visual
+information. Therefore, multimodal analysis is an important direction for future
+harmful-content detection.
+
+\subsubsection*{Large Language Models}
+Large language models are a newer research direction in propaganda detection.
+Pi\~na-Garc\'ia used few-shot LLaMA~3.2 to classify propagandistic tweets and
+examine linguistic and coordination patterns in Mexican election-related
+data~\cite{pina2025}.
+
+Gaeta et al.\ proposed an LLM-based system that detects propaganda and identifies
+the specific parts of a text that contain propagandistic content~\cite{gaeta2025}.
+
+However, LLM performance depends strongly on data quality. Maarouf et al.\ showed
+that models trained with weak labels achieved an AUC of 64.03, whereas models
+trained with high-quality human annotations achieved an AUC of 92.25. Prompt-based
+learning with a smaller set of high-quality samples achieved an AUC of
+80.27~\cite{maarouf2024}.
+
+This indicates that better models alone are not enough. High-quality training and
+evaluation data are also essential.
+
+\subsection{Summary of Literature}
+\label{sec:lit-summary}
+Table~\ref{tab:litsummary} provides a systematic comparative summary of the
+reviewed literature, outlining the core computational methods, benchmark datasets,
+key findings, and critical limitations of prior work.
+
+\begingroup
+\small
+\setlength{\tabcolsep}{4pt}
+\renewcommand{\arraystretch}{1.25}
+\begin{longtable}{@{}L{3.1cm}C{0.8cm}L{2.2cm}L{3.5cm}L{3.3cm}@{}}
+\caption{Summary of related research papers.}\label{tab:litsummary}\\
+\toprule
+\textbf{Paper Title \& Citation} & \textbf{Year} & \textbf{Dataset Used} & \textbf{Key Methodology \& Findings} & \textbf{Critical Limitations}\\
+\midrule
+\endfirsthead
+\multicolumn{5}{@{}l}{\small\itshape Table~\thetable\ (continued)}\\
+\toprule
+\textbf{Paper Title \& Citation} & \textbf{Year} & \textbf{Dataset Used} & \textbf{Key Methodology \& Findings} & \textbf{Critical Limitations}\\
+\midrule
+\endhead
+\midrule
+\multicolumn{5}{r@{}}{\small\itshape Continued on next page}\\
+\endfoot
+\bottomrule
+\endlastfoot
+
+\textbf{Spread of propaganda by coordinated communities on social media}~\cite{hristakieva2022} & 2022 & Twitter (Italian elections \& COVID-19) &
+Analyzed coordinated link-sharing networks and bot behavior using network graphs. Found that propaganda spreaders exhibit significantly higher coordination than benign users. &
+Evaluated only on high-resource languages (Italian/English); text semantics were secondary to network topology; lacks multimodal analysis.\\
+\addlinespace
+\textbf{BanFakeNews: A dataset for detecting fake news in Bangla}~\cite{hossain2020} & 2020 & BanFakeNews (50,000 Bangla news articles) &
+Landmark benchmark Bangla dataset for fake news detection; evaluated SVM, Random Forest, and LSTM architectures. &
+Focuses strictly on factual veracity (fake vs.\ real) rather than rhetorical propaganda techniques; purely text-based without social context or coordination tracking.\\
+\addlinespace
+\textbf{BanMANI: Manipulated social media news in Bangla}~\cite{kamruzzaman2023} & 2023 & BanMANI (social media news posts) &
+Categorizes social media news manipulation into multiple classes; demonstrates the efficacy of transfer learning. &
+Small dataset size; does not analyze coordinated amplification campaigns or image--text multimodal relationships.\\
+\addlinespace
+\textbf{Coordinated information campaigns on social media}~\cite{ng2023} & 2023 & Twitter / Reddit multi-domain data &
+Multi-faceted framework fusing semantic similarity, temporal proximity, and network clustering to detect coordinated operations. &
+Computationally intensive; designed primarily for English; relies on extensive historical user activity graphs often unavailable in low-resource contexts.\\
+\addlinespace
+\textbf{Propaganda and bias in social media: Israel--Gaza war}~\cite{duridi2025} & 2025 & Arabic X (Twitter) posts &
+Evaluated classical ML (SVM) against deep learning (AraBERT); SVM achieved superior performance on propaganda classification while AraBERT excelled at bias detection. &
+Restricted to short text posts; does not address multimodal memes or cross-platform campaign coordination.\\
+\addlinespace
+\textbf{Hierarchical graph-based integration network for propaganda detection}~\cite{ahmad2025} & 2025 & SemEval propaganda corpus (English) &
+H-GIN model capturing long-range, non-adjacent token relationships via graph neural networks; reported 82\% accuracy. &
+Operates solely on English long-form news articles; high graph construction latency; no support for low-resource or code-mixed text.\\
+\addlinespace
+\textbf{Text-image multimodal fusion for fake news detection}~\cite{lin2024} & 2024 & Weibo \& Twitter multimodal benchmarks &
+Cross-modal attention network fusing visual features (ResNet/ViT) with textual embeddings (BERT); showed multimodal fusion outperforms unimodal baselines. &
+Evaluated on Chinese and English benchmarks; vulnerable to false positives when meme text and images are intentionally incongruent.\\
+\addlinespace
+\textbf{Explaining multimodal hateful meme detection models}~\cite{hee2022} & 2022 & Facebook Hateful Memes dataset &
+Investigates multimodal interpretability; reveals that multimodal models frequently latch onto background image biases and surface textual heuristics. &
+Demonstrates explainability challenges; lacks application to political propaganda in South Asian contexts.\\
+\addlinespace
+\textbf{Beyond content: Behavioral policies reveal actors in information operations}~\cite{schneider2026} & 2026 & Twitter \& Reddit coordinated influence sets &
+Models user behavioral policies (posting timing, activity patterns) reaching 94.9\% macro-F1, outperforming text embeddings (91.2\%). &
+Requires rich temporal account metadata; unviable for anonymous or newly created ephemeral accounts.\\
+\addlinespace
+\textbf{BD-SHS: Benchmark dataset for online Bangla hate speech}~\cite{romim2022} & 2022 & BD-SHS (Bangla social comments) &
+Diverse benchmark across multiple social categories; achieved 91.0\% F1-score using transformer fine-tuning. &
+Focuses on abusive language rather than persuasive propaganda techniques; lacks coordination and image features.\\
+\addlinespace
+\textbf{LLM-based multi-task Bangla hate speech detection}~\cite{hasan2026} & 2026 & BanglaMultiHate dataset &
+Multi-task framework evaluating classical ML, BanglaBERT, and few-shot LLMs across hate speech type, severity, and target. &
+Shows that while LLMs are promising, domain-specialized models (BanglaBERT) often yield superior and more consistent F1 on local cultural nuances.\\
+\addlinespace
+\textbf{HQP: A human-annotated dataset for detecting online propaganda}~\cite{maarouf2024} & 2024 & HQP (English articles) &
+Proves data quality impact: weak labels gave 64.03 AUC, whereas human-annotated data achieved 92.25 AUC. Prompt-learning with small verified sets achieved 80.27 AUC. &
+English-only; underscores the vital necessity of human verification over pure LLM automated annotation.\\
+\end{longtable}
+\endgroup
+
+\section{Gap Analysis}
+The reviewed literature shows several important gaps that can be addressed by the
+proposed work:
+
+\subsection{Gap 1: Limited Support for Low-Resource Languages}
+Many existing systems are developed and tested mainly on high-resource languages.
+Research on Bengali and Bangla shows that limited annotated datasets and language
+resources remain major problems~\cite{lora2023,hasan2026,romim2022}. More work is
+needed on systems that can effectively handle low-resource languages.
+
+\subsection{Gap 2: Heavy Dependence on Text}
+Many detection systems focus mainly on textual information. However, social-media
+content often includes images, and important information may appear in the
+relationship between text and images~\cite{lin2024,hee2022}. This creates a need
+for systems that can analyze multiple modalities together.
+
+\subsection{Gap 3: Limited Use of Behavioral Information}
+Traditional content-based systems may fail when users intentionally change or
+disguise their language. Behavioral and network-based research shows that user
+activity and coordination can provide additional
+evidence~\cite{declerck2024,sela2025,schneider2026}. However, these signals are not
+always integrated with text and multimodal models.
+
+\subsection{Gap 4: Data Quality and Annotation Problems}
+The quality of the training data has a strong effect on model performance. HQP
+demonstrates that high-quality human annotation can produce much better results
+than weak labeling~\cite{maarouf2024}. Bangla research also emphasizes the
+importance of culturally grounded and socially diverse
+datasets~\cite{hasan2026,romim2022}.
+
+\subsection{Gap 5: Generalization Across Datasets and Domains}
+A model can perform well on one dataset but perform differently on another dataset.
+The reviewed literature therefore indicates the need for evaluation across multiple
+datasets, domains, and languages rather than relying on a single
+benchmark~\cite{ahmad2025}.
+
+\subsection{Gap 6: Explainability}
+Many machine-learning and deep-learning systems provide a final classification
+without clearly explaining why a particular post was detected as harmful. This can
+be especially problematic for propaganda, sarcasm, memes, and culturally sensitive
+content. More interpretable systems are therefore
+needed~\cite{ahmad2025,hee2022,maarouf2024}.
+
+\subsection{Proposed Research Opportunity}
+Based on these gaps, there is an opportunity to develop a system that combines
+multiple types of evidence. Such a system could use text analysis together with
+image information and, where available, behavioral or network signals. For a
+low-resource language such as Bangla, the system could also use language-specific
+pretrained models and carefully annotated local datasets.
+
+The main focus should therefore be on building a detection approach that is not
+dependent on a single signal or a single dataset. It should be evaluated for
+accuracy, robustness, and generalization across different types of online content.
+
+\section{Summary}
+This chapter presented the background concepts needed to understand propaganda and
+harmful-content detection. It discussed machine learning, deep learning,
+graph-based approaches, multimodal analysis, behavioral signals, and the challenges
+of low-resource languages.
+
+The literature review showed that researchers are moving from text-only systems
+toward approaches that combine content, user behavior, network structure, images,
+and large language models~\cite{duridi2025,plikynas2025,lora2023,hasan2026,ahmad2025,lin2024,hee2022,declerck2024,sela2025,schneider2026,romim2022,haider2020,wang2022,pina2025,gaeta2025,maarouf2024}.
+The studies also show that no single method works equally well for every task.
+Model performance depends on the problem, the dataset, the available language
+resources, and the quality of annotation.
+
+The gap analysis identified several areas that still need improvement, especially
+low-resource language support, multimodal analysis, behavioral information, data
+quality, cross-dataset evaluation, and explainability. These gaps provide the
+motivation for developing a more integrated detection system that can work with
+low-resource and multimodal social-media content.
+
+% =====================================================================
+%                            CHAPTER 3
+% =====================================================================
+\chapter{Project Design}
+\label{ch:design}
+
+\section{Project Design Overview}
+This chapter presents the design of the proposed Bangla propaganda detection
+system. It describes the system requirements, overall interaction and data flow,
+user-interface design, the detailed methodology (including alternative solutions
+considered and the reasons for selecting the proposed approach), the project plan,
+and the allocation of tasks among team members.
+
+\section{Requirement Analysis}
+Requirement analysis identifies what the proposed system should do and what
+constraints it should satisfy. The requirements are divided into functional and
+nonfunctional requirements, followed by diagrams showing how users, data, and
+system components interact.
+
+\subsection{Functional and Nonfunctional Requirements}
+
+\subsubsection*{Functional Requirements}
+\begin{itemize}
+  \item \textbf{FR1: User Input.} The system shall allow a user to enter or submit
+        Bangla text for analysis.
+  \item \textbf{FR2: Text Preprocessing.} The system shall clean and prepare the
+        submitted Bangla text before sending it to the detection model.
+  \item \textbf{FR3: Propaganda Detection.} The system shall analyze the input text
+        and determine whether propaganda is present.
+  \item \textbf{FR4: Propaganda Technique Identification.} When propaganda is
+        detected, the system should identify the possible propaganda technique,
+        such as loaded language, fear appeal, or bandwagon, based on the final
+        label set used in the dataset.
+  \item \textbf{FR5: Result Display.} The system shall display the prediction
+        clearly to the user (Input: Bangla social-media text; Prediction:
+        Propaganda Detected; Technique: Loaded Language).
+  \item \textbf{FR6: Confidence Information.} The system may display a confidence
+        score or confidence level associated with the prediction.
+  \item \textbf{FR7: Dataset Management.} The research component of the system
+        shall support the collection, cleaning, annotation, verification, and
+        storage of Bangla propaganda examples.
+  \item \textbf{FR8: LLM-Assisted Pre-Annotation.} The dataset-development
+        pipeline shall allow an LLM to generate an initial label suggestion for
+        collected Bangla content.
+  \item \textbf{FR9: Human Verification.} The system or research workflow shall
+        allow a human annotator to review and correct the LLM's suggested label.
+  \item \textbf{FR10: Model Training.} The research pipeline shall support training
+        and fine-tuning of the selected propaganda detection model using the
+        human-verified dataset.
+  \item \textbf{FR11: Model Evaluation.} The system shall calculate evaluation
+        measures including accuracy, precision, recall, and F1-score.
+  \item \textbf{FR12: Iterative Dataset Improvement.} The research workflow shall
+        identify poorly performing classes and allow additional data to be
+        collected or generated and verified.
+\end{itemize}
+
+\subsubsection*{Nonfunctional Requirements}
+\begin{itemize}
+  \item \textbf{NFR1: Usability.} The user interface should be simple enough that a
+        user can submit Bangla text and understand the prediction without
+        technical knowledge.
+  \item \textbf{NFR2: Performance.} The system should provide predictions within a
+        reasonable response time for normal user requests.
+  \item \textbf{NFR3: Reliability.} The system should provide consistent results
+        when the same input is analyzed under the same model configuration.
+  \item \textbf{NFR4: Accuracy.} The model should achieve acceptable performance
+        according to the selected evaluation metrics.
+  \item \textbf{NFR5: Maintainability.} The system should be designed so that the
+        detection model and dataset can be updated without rebuilding the complete
+        application.
+  \item \textbf{NFR6: Scalability.} The architecture should allow the dataset and
+        model to grow beyond the initial 500--1,000 custom samples.
+  \item \textbf{NFR7: Security.} User-submitted data and research data should be
+        handled securely and unnecessary personal information should not be stored.
+  \item \textbf{NFR8: Explainability.} Where feasible, the system should provide
+        useful information about why a text was classified as potentially
+        propagandistic rather than displaying only a class label.
+  \item \textbf{NFR9: Language Support.} The main detection workflow shall support
+        Bangla text.
+\end{itemize}
+
+% ---------------------------------------------------------------------
+\subsection{Context Diagram}
+The context diagram represents the proposed system as a single high-level process
+and shows its relationship with external entities. The main external entities are:
+\begin{enumerate}
+  \item \textbf{User:} \emph{User $\rightarrow$ System:} Bangla text.
+        \emph{System $\rightarrow$ User:} detection result, propaganda category,
+        and optional confidence information.
+  \item \textbf{Researcher / Administrator:} manages the research dataset and
+        model-development process. \emph{Researcher $\rightarrow$ System:} raw
+        data, annotation decisions, training configuration.
+        \emph{System $\rightarrow$ Researcher:} dataset information, model
+        results, evaluation metrics.
+  \item \textbf{LLM Service:} used during dataset development as a pre-annotation
+        assistant. \emph{System $\rightarrow$ LLM:} Bangla sample and annotation
+        prompt. \emph{LLM $\rightarrow$ System:} suggested label, possible
+        technique, and explanation. (The LLM output is \emph{not} considered the
+        final ground truth; human verification is strictly required.)
+  \item \textbf{External Data Sources:} publicly available datasets and other
+        permitted sources provide the initial and additional Bangla data used
+        during development. \emph{External Data Sources $\rightarrow$ System:}
+        Bangla text/images and associated metadata where available.
+\end{enumerate}
+
+\begin{figure}[H]
+\centering
+\begin{adjustbox}{max width=\textwidth}
+\begin{tikzpicture}
+% central system
+\node[draw=boxdraw,thick,fill=boxfill,rounded corners=6pt,minimum width=32mm,
+      minimum height=66mm,text width=26mm,align=center,font=\footnotesize\bfseries] (S) at (0,0)
+      {Bangla Propaganda Detection System};
+% external entities
+\node[ext] (U) at (-5.6, 2.2) {User};
+\node[ext] (R) at (-5.6,-2.2) {Researcher / Administrator};
+\node[ext] (L) at ( 5.6, 2.2) {LLM Service};
+\node[ext] (E) at ( 5.6,-2.2) {External Data Sources};
+
+% User <-> System
+\draw[flow] (-4.29, 2.65) -- node[lab,above,text width=25mm]{Bangla text} (-1.6, 2.65);
+\draw[flow] (-1.6, 1.75) -- node[lab,below,text width=25mm]{Detection result, category \& confidence} (-4.29, 1.75);
+% Researcher <-> System
+\draw[flow] (-4.29,-1.75) -- node[lab,above,text width=25mm]{Raw data, annotation decisions, training config} (-1.6,-1.75);
+\draw[flow] (-1.6,-2.65) -- node[lab,below,text width=25mm]{Dataset info, model results, metrics} (-4.29,-2.65);
+% System <-> LLM
+\draw[flow] ( 1.6, 2.65) -- node[lab,above,text width=25mm]{Cleaned sample \& annotation prompt} ( 4.29, 2.65);
+\draw[flow] ( 4.29, 1.75) -- node[lab,below,text width=25mm]{Suggested label, technique \& explanation} ( 1.6, 1.75);
+% External data -> System
+\draw[flow] ( 4.29,-2.2) -- node[lab,above,text width=25mm]{Raw Bangla text/images \& metadata} ( 1.6,-2.2);
+\end{tikzpicture}
+\end{adjustbox}
+\caption{Context diagram --- the proposed system acts as the central component
+connecting the user, research workflow, external datasets, and the LLM-based
+annotation assistant.}
+\label{fig:context}
+\end{figure}
+
+% ---------------------------------------------------------------------
+\subsection{Data Flow Diagram}
+\label{sec:dfd}
+
+\subsubsection{Level 1 Data Flow Diagram}
+The Level~1 Data Flow Diagram (DFD) expands the main system into its major internal
+processes and data stores.
+
+\paragraph{Processes.}
+\begin{itemize}
+  \item \textbf{P1: Data Collection and Management.} Collects Bangla data from
+        existing datasets and permitted online sources.
+  \item \textbf{P2: Data Preprocessing.} Cleans, normalizes, and prepares the
+        collected data.
+  \item \textbf{P3: LLM Pre-Annotation.} Sends the cleaned samples to the LLM and
+        receives possible propaganda labels and explanations.
+  \item \textbf{P4: Human Verification.} Allows the researcher or annotator to
+        review the LLM output and produce the final verified label.
+  \item \textbf{P5: Model Training.} Uses the verified dataset to fine-tune the
+        selected machine-learning model.
+  \item \textbf{P6: Model Evaluation.} Evaluates the trained model using accuracy,
+        precision, recall, F1-score, and class-wise performance.
+  \item \textbf{P7: User Prediction.} Receives new Bangla text from the user,
+        preprocesses it, sends it to the trained model, and returns the prediction.
+\end{itemize}
+
+\paragraph{Main data stores.}
+\begin{itemize}
+  \item \textbf{D1: Raw Dataset} --- collected Bangla data before processing.
+  \item \textbf{D2: Processed Dataset} --- cleaned and prepared data.
+  \item \textbf{D3: Human-Verified Dataset} --- final dataset with human-confirmed
+        labels.
+  \item \textbf{D4: Trained Model} --- the trained propaganda detection model.
+  \item \textbf{D5: Evaluation Results} --- performance measures and experimental
+        results.
+\end{itemize}
+
+\begin{figure}[H]
+\centering
+\begin{adjustbox}{max width=\textwidth,max height=0.84\textheight}
+\begin{tikzpicture}
+% external entities (left)
+\node[ext]  (eds) at (-5.3,  0.0) {External Data Sources};
+\node[ext]  (llm) at (-5.3, -4.8) {LLM Service};
+\node[ext]  (res) at (-5.3, -7.2) {Researcher / Expert};
+\node[ext]  (usr) at (-5.3,-15.9) {End User};
+% processes (centre)
+\node[proc,text width=30mm] (p1) at (0,  0.0) {P1: Data Collection \& Management};
+\node[proc,text width=30mm] (p2) at (0, -2.4) {P2: Data Preprocessing};
+\node[proc,text width=30mm] (p3) at (0, -4.8) {P3: LLM Pre-Annotation};
+\node[proc,text width=30mm] (p4) at (0, -7.2) {P4: Human Verification};
+\node[proc,text width=30mm] (p5) at (0, -9.6) {P5: Model Training};
+\node[proc,text width=30mm] (p6) at (0,-12.9) {P6: Model Evaluation (uses test split of D3)};
+\node[proc,text width=30mm] (p7) at (0,-15.9) {P7: User Prediction};
+% data stores (right)
+\node[store,text width=26mm] (d1) at (5.3, -1.2) {D1: Raw Dataset};
+\node[store,text width=26mm] (d2) at (5.3, -3.6) {D2: Processed Dataset};
+\node[store,text width=26mm] (d3) at (5.3, -8.4) {D3: Human-Verified Dataset};
+\node[store,text width=26mm] (d4) at (5.3,-11.0) {D4: Trained Model (weights \& config)};
+\node[store,text width=26mm] (d5) at (5.3,-12.9) {D5: Evaluation Results};
+\node[ext]   (r2) at (5.3,-14.9) {Researcher / Expert};
+
+% ---- flows
+\draw[flow] (eds) -- node[lab,above]{Raw content} (p1);
+\draw[flow] (p1.east) -| (d1.north);
+\draw[flow] (d1.west) -| (p2.north);
+\draw[flow] (p2.east) -| (d2.north);
+\draw[flow] (d2.west) -| (p3.north);
+\draw[flow,<->] (p3.west) -- node[lab,above,text width=20mm]{Prompts \& suggestions} (llm.east);
+\draw[flow] (p3.south) -- node[lab,right]{Pre-annotated} (p4.north);
+\draw[flow,<->] (p4.west) -- node[lab,above,text width=20mm]{Review \& correct} (res.east);
+\draw[flow] (p4.east) -| (d3.north);
+\draw[flow] (d3.west) -| (p5.north);
+\draw[flow] (p5.east) -| (d4.north);
+\draw[flow] (d4.west) -| (p6.north);
+\draw[flow] (p6.east) -- (d5.west);
+\draw[flow] (d5.south) -- node[lab,right]{Results} (r2.north);
+\draw[flow] (d4.east) -- ++(0.9,0) |- (p7.east);
+\node[lab,above,text width=16mm] at (2.8,-15.9) {Inference weights};
+% user <-> P7
+\draw[flow] ($(usr.east)+(0,0.25)$) -- node[lab,above]{Bangla text} ($(p7.west)+(0,0.25)$);
+\draw[flow] ($(p7.west)-(0,0.25)$) -- node[lab,below,text width=22mm]{Prediction, category \& explanation} ($(usr.east)-(0,0.25)$);
+\end{tikzpicture}
+\end{adjustbox}
+\caption{Level~1 Data Flow Diagram (DFD) --- the dual-workflow architecture: the
+research and model-development pipeline and the end-user prediction workflow.}
+\label{fig:dfd1}
+\end{figure}
+
+\subsubsection{Detailed Level 2 Data Flow Diagram}
+\label{sec:dfd2}
+Figure~\ref{fig:dfd2} expands the Level~1 processes to show their internal
+processing. Processes~1 and~2 harvest and normalize both text and images.
+Processes~3 and~4 form the hybrid annotation engine, where few-shot prompts drive an
+LLM to produce candidate suggestions that are placed in a buffer and then verified
+by human annotators in a dedicated workspace before being written to the verified
+ground-truth store (D3). Process~5 tokenizes verified text, encodes it with a
+BanglaBERT/XLM-R backbone, encodes images with a ViT/ResNet extractor, and joins the
+two through a cross-modal attention fusion layer feeding the propaganda technique
+classification head. Processes~6 and~7 serve live user input through the inference
+engine and pair each prediction with a feature-attribution explainability module.
+
+\begin{figure}[H]
+\centering
+\begin{adjustbox}{max width=\textwidth,max height=0.86\textheight}
+\begin{tikzpicture}
+% ===== Processes 1 & 2
+\node[blk]  (raw)   at (-5.25, 0.0) {Raw Online Bangla Content};
+\node[proc] (scr)   at (-1.75, 0.0) {Automated Scraper \& API Harvester};
+\node[proc] (img)   at ( 1.75, 0.0) {Image Preprocessing: Normalization \& Resizing};
+\node[proc] (clean) at ( 1.75,-1.9) {Bangla Text Cleaner: Emoji, Punctuation, Normalizer};
+\draw[grp] (-6.8,0.95) rectangle (6.8,-2.85);
+\node[grptitle,anchor=south west] at (-6.8,0.95) {Processes 1 \& 2: Ingestion \& Preprocessing};
+\draw[flow] (raw) -- (scr);
+\draw[flow] (scr) -- (img);
+\draw[flow] (scr.south) |- (clean.west);
+
+% ===== Processes 3 & 4
+\node[proc]  (prompt) at ( 1.75,-4.5) {Few-Shot Prompt Constructor};
+\node[proc]  (llm)    at (-1.75,-4.5) {LLM Pre-Annotation API};
+\node[store] (buf)    at (-5.25,-4.5) {Candidate Suggestion Buffer};
+\node[proc]  (ui)     at (-5.25,-6.4) {Human Annotator Verification Workspace};
+\node[store] (gt)     at (-1.75,-6.4) {D3: Verified Ground-Truth Store};
+\draw[grp] (-6.8,-3.55) rectangle (6.8,-7.35);
+\node[grptitle,anchor=south west] at (-6.8,-3.55) {Processes 3 \& 4: Hybrid Annotation Engine};
+\draw[flow] (clean.south) -- (prompt.north);
+\draw[flow] (prompt) -- (llm);
+\draw[flow] (llm) -- (buf);
+\draw[flow] (buf) -- (ui);
+\draw[flow] (ui) -- (gt);
+
+% ===== Process 5
+\node[proc] (tok)  at (-1.75, -9.0) {Bangla WordPiece / SentencePiece Tokenizer};
+\node[proc] (bb)   at ( 1.75, -9.0) {BanglaBERT / XLM-R Transformer Backbone};
+\node[proc] (fuse) at ( 1.75,-10.9) {Cross-Modal Attention Fusion Layer};
+\node[proc] (vit)  at ( 5.25,-10.9) {Vision Transformer / ResNet Visual Extractor};
+\node[proc] (cls)  at (-1.75,-10.9) {Propaganda Technique Classification Head};
+\draw[grp] (-6.8,-8.05) rectangle (6.8,-11.85);
+\node[grptitle,anchor=south east] at (6.8,-8.05) {Process 5: Feature Extraction \& Model Training};
+\draw[flow] (gt.south) -- (tok.north);
+\draw[flow] (tok) -- (bb);
+\draw[flow] (bb) -- (fuse);
+\draw[flow] (vit) -- (fuse);
+\draw[flow] (fuse) -- (cls);
+% image path (outside right)
+\draw[dflow] (img.east) -- (7.05,0) |- (vit.east);
+\node[lab,rotate=90,anchor=north] at (7.1,-5.5) {Image features};
+
+% ===== Processes 6 & 7
+\node[ext]  (uin)  at (-5.25,-14.4) {User Bangla Text / URL};
+\node[proc] (inf)  at (-1.75,-14.4) {Model Inference Engine};
+\node[proc] (pout) at ( 1.75,-13.5) {Propaganda Label \& Technique Identification};
+\node[proc] (shap) at ( 1.75,-15.3) {Feature Attribution \& Explainability Module};
+\node[proc] (disp) at ( 5.25,-14.4) {Web Results Dashboard};
+\draw[grp] (-6.8,-12.55) rectangle (6.8,-16.25);
+\node[grptitle,anchor=south east] at (6.8,-12.55) {Processes 6 \& 7: Prediction \& Explainability};
+\draw[flow] (uin) -- (inf);
+\draw[flow] (inf.east)  -- ++(0.43,0) |- (pout.west);
+\draw[flow] (inf.east)  -- ++(0.43,0) |- (shap.west);
+\draw[flow] (pout.east) -- ++(0.43,0) |- (disp.west);
+\draw[flow] (shap.east) -- ++(0.43,0) |- (disp.west);
+\draw[dflow] (cls.south) -- (inf.north);
+\node[lab,anchor=west] at (-1.6,-12.2) {Trained weights};
+\end{tikzpicture}
+\end{adjustbox}
+\caption{Detailed Level~2 Data Flow Diagram (DFD) for the proposed system.}
+\label{fig:dfd2}
+\end{figure}
+
+% ---------------------------------------------------------------------
+\subsection{UI Design}
+The proposed application uses a simple, intuitive interface so that users can
+easily submit Bangla content and understand the result.
+
+\subsubsection*{Main Screen}
+The main screen contains the application title (\textbf{Bangla Propaganda Detection
+System}), a short explanation of the system purpose, a Bangla text input area, an
+``Analyze'' button, and a result section.
+
+\begin{figure}[H]
+\centering
+\begin{adjustbox}{max width=\textwidth}
+\begin{tikzpicture}[ui/.style={font=\footnotesize,anchor=west}]
+\draw[boxdraw,thick,rounded corners=4pt,fill=white] (-6.2,0) rectangle (6.2,-9.4);
+\node[font=\large\bfseries] at (0,-0.75) {Bangla Propaganda Detection System};
+\node[font=\footnotesize] at (0,-1.4) {Analyze Bangla digital content for persuasive \& propaganda cues};
+\draw[boxdraw] (-5.8,-1.85) -- (5.8,-1.85);
+
+\node[ui,font=\footnotesize\bfseries] at (-5.8,-2.4) {Enter Bangla Text:};
+\draw[gray,rounded corners=2pt,fill=gray!6] (-5.8,-2.75) rectangle (5.8,-4.55);
+\node[ui,text=gray] at (-5.6,-3.15) {\bn{এখানে বাংলা সোশ্যাল মিডিয়া পোস্ট বা খবর লিখুন\ldots}};
+
+\node[draw=boxdraw,fill=uiublue,text=white,rounded corners=3pt,minimum width=32mm,
+      minimum height=8mm,font=\footnotesize\bfseries] at (0,-5.3) {Analyze};
+\draw[boxdraw] (-5.8,-6.0) -- (5.8,-6.0);
+
+\node[ui,font=\footnotesize\bfseries] at (-5.8,-6.5) {Result:};
+\node[ui,anchor=north west,text width=11cm,align=left] at (-5.6,-6.9)
+  {\textbf{Prediction:} Propaganda Detected\\[2pt]
+   \textbf{Technique:} Loaded Language\\[2pt]
+   \textbf{Confidence:} Medium\\[2pt]
+   \textbf{Explanation:} The text contains emotionally strong wording that may influence the reader.};
+\end{tikzpicture}
+\end{adjustbox}
+\caption{Main screen result interface.}
+\label{fig:ui-main}
+\end{figure}
+
+\subsubsection*{Result Interface}
+The result page clearly separates the input, prediction, and explanation:
+\textbf{Prediction:} Propaganda Detected; \textbf{Possible Technique:} Loaded
+Language; \textbf{Confidence:} Medium; \textbf{Explanation:} the text contains
+emotionally strong wording that may influence the reader. The explanation is
+treated as supporting information rather than as a replacement for the
+classification result.
+
+\subsubsection*{Annotation Interface}
+A separate interface is used by the researcher or annotator to support the LLM
+pre-annotation $\rightarrow$ human verification workflow.
+
+\begin{figure}[H]
+\centering
+\begin{adjustbox}{max width=\textwidth}
+\begin{tikzpicture}[ui/.style={font=\footnotesize,anchor=west},
+                    b/.style={ui,font=\footnotesize\bfseries}]
+\draw[boxdraw,thick,rounded corners=4pt,fill=white] (-6.2,0) rectangle (6.2,-11.0);
+\node[font=\large\bfseries] at (0,-0.7) {Researcher / Annotator Interface};
+\draw[boxdraw] (-5.8,-1.2) -- (5.8,-1.2);
+
+\node[ui] at (-5.8,-1.7) {\textbf{Sample ID:} \#1042};
+\node[ui] at (-5.8,-2.3) {\textbf{Text:} ``\ldots'' (Bangla sample text)};
+
+\node[b] at (-5.8,-3.1) {LLM Suggested Label:};
+\node[ui,draw=boxdraw,fill=boxfill,inner sep=3pt] at (-2.2,-3.1) {Propaganda Detected};
+\node[b] at (-5.8,-3.8) {Suggested Technique:};
+\node[ui,draw=boxdraw,fill=boxfill,inner sep=3pt] at (-2.2,-3.8) {Fear Appeal};
+\node[b] at (-5.8,-4.5) {LLM Rationale:};
+\node[ui] at (-2.2,-4.5) {Mentions severe imminent societal threat};
+
+\node[b] at (-5.8,-5.4) {Human Decision:};
+\draw (-5.5,-6.0) circle (0.11);  \node[ui] at (-5.25,-6.0) {Accept LLM Suggestion};
+\draw (-5.5,-6.65) circle (0.11); \node[ui] (mod) at (-5.25,-6.65) {Modify Label:};
+\node[ui,draw=gray,inner sep=3pt,right=3mm of mod] {Select Technique $\blacktriangledown$};
+\draw (-5.5,-7.3) circle (0.11);  \node[ui] at (-5.25,-7.3) {Mark Ambiguous / Sarcastic};
+
+\node[b] at (-5.8,-8.05) {Annotator Notes:};
+\draw[gray,rounded corners=2pt,fill=gray!6] (-5.8,-8.35) rectangle (5.8,-9.35);
+
+\node[draw=boxdraw,fill=uiublue,text=white,rounded corners=3pt,minimum width=48mm,
+      minimum height=8mm,font=\footnotesize\bfseries] at (0,-10.2) {Confirm Ground Truth};
+\end{tikzpicture}
+\end{adjustbox}
+\caption{Annotation interface.}
+\label{fig:ui-annot}
+\end{figure}
+
+% ---------------------------------------------------------------------
+\section{Detailed Methodology and Design}
+\label{sec:detailed-method}
+This section explains how the proposed system will be developed and why the
+selected solutions are appropriate. Several alternative approaches were considered
+before selecting the proposed combination of existing datasets, human-verified
+custom data, transformer-based models, and LLM-assisted annotation.
+
+\subsection{Overall Design Approach}
+The project follows an iterative design rather than attempting to build the
+complete system in a single step:
+\[
+\begin{gathered}
+\text{Existing Dataset} \rightarrow \text{Baseline Pipeline} \rightarrow \text{Custom Dataset} \\
+\rightarrow \text{Annotation} \rightarrow \text{Model Training} \rightarrow \text{Evaluation} \rightarrow \text{Improvement}
+\end{gathered}
+\]
+This approach reduces development risk because the model-development pipeline can
+be tested before the custom dataset is complete.
+
+\subsection{Alternative Solutions Considered}
+
+\subsubsection{Alternative 1: Building a Large Dataset Completely From Scratch}
+One possible approach was to immediately collect and manually annotate a very large
+Bangla dataset (e.g., attempting to label 10,000--50,000 samples before beginning
+model development).
+\begin{itemize}
+  \item \textbf{Advantages:} Labels would be created specifically for the research
+        task; the dataset could be designed around the exact propaganda categories
+        required.
+  \item \textbf{Disadvantages:} Manual annotation would require a large amount of
+        time; annotation cost would increase significantly; difficult and
+        ambiguous examples would require additional review; model development
+        would need to wait until a large dataset was completed.
+  \item \textbf{Selected Approach:} The proposed research instead begins with
+        existing datasets and gradually creates a smaller custom dataset. This
+        allows the technical pipeline to be developed immediately and reduces the
+        initial annotation burden.
+\end{itemize}
+
+\subsubsection{Alternative 2: Fully Automatic LLM Annotation}
+Another possible solution was to ask an LLM to label all collected samples and
+directly use those labels as the dataset ground truth.
+\begin{itemize}
+  \item \textbf{Advantages:} Very fast compared with manual annotation; large
+        quantities of data can be labeled automatically; reduces human workload.
+  \item \textbf{Disadvantages:} LLM predictions can be incorrect; ambiguous Bangla
+        language may be interpreted incorrectly; the LLM may introduce systematic
+        labeling bias; using LLM labels as ground truth may reduce dataset
+        reliability.
+  \item \textbf{Selected Approach:} The proposed system uses the LLM only for
+        pre-annotation. Every final label must be checked by a human annotator.
+        Therefore
+        \[\text{LLM Suggestion}\neq\text{Ground Truth},\]
+        and the ground truth is the final human-verified label.
+\end{itemize}
+
+\subsubsection{Alternative 3: Complete Manual Annotation}
+A third approach is to manually annotate every collected sample without using an LLM.
+\begin{itemize}
+  \item \textbf{Advantages:} Direct human judgment; better control over the
+        annotation process; no dependence on LLM-generated suggestions.
+  \item \textbf{Disadvantages:} Very time-consuming; more expensive in terms of
+        researcher effort; difficult to scale as the dataset grows; annotators may
+        become tired, which can reduce consistency.
+  \item \textbf{Selected Approach:} The proposed LLM-assisted approach provides a
+        compromise. The LLM performs an initial classification, while humans make
+        the final decision. This reduces repetitive work without removing human
+        control.
+\end{itemize}
+
+\subsubsection{Alternative 4: Traditional Machine Learning}
+Traditional models such as SVM, Logistic Regression, or Naive Bayes could be used as
+the main final classifier.
+\begin{itemize}
+  \item \textbf{Advantages:} Simple to implement; fast to train; computationally
+        inexpensive; useful as baseline models.
+  \item \textbf{Disadvantages:} Usually require manually designed text features;
+        may have difficulty capturing complex contextual relationships in Bangla;
+        may perform poorly when propaganda depends on wider context.
+  \item \textbf{Selected Approach:} A traditional model is still implemented as a
+        baseline. However, the main experiments investigate transformer-based
+        models because they capture contextual language information more
+        effectively.
+\end{itemize}
+
+\subsubsection{Alternative 5: BanglaBERT vs.\ XLM-R}
+Two candidate transformer approaches are particularly relevant:
+\begin{itemize}
+  \item \textbf{BanglaBERT.} \emph{Advantages:} designed specifically for Bangla;
+        suitable for Bangla text classification; can provide strong
+        language-specific representations. \emph{Disadvantages:} primarily focused
+        on Bangla; may be less suitable if the project is later expanded to
+        multiple languages.
+  \item \textbf{XLM-R.} \emph{Advantages:} supports many languages; can support
+        multilingual expansion; useful if the system later needs to process both
+        Bangla and other languages. \emph{Disadvantages:} not designed only for
+        Bangla; a Bangla-specific model may be more suitable for some Bangla-only
+        tasks.
+  \item \textbf{Selected Approach:} BanglaBERT is used as the primary candidate and
+        XLM-R as a comparison model. This allows the research to determine whether
+        a Bangla-specific model or a multilingual model performs better on the
+        custom dataset instead of assuming the answer beforehand.
+\end{itemize}
+
+\subsubsection{Alternative 6: Text-Only vs.\ Multimodal Detection}
+A text-only system is simpler because it requires only Bangla text. However,
+propaganda can also appear through images, memes, and combinations of text and
+visual content. Existing research shows that multimodal information can contain
+useful detection signals.
+\begin{itemize}
+  \item \textbf{Text-Only Approach.} \emph{Advantages:} easier to implement;
+        requires fewer computational resources; easier dataset collection;
+        suitable for the initial prototype. \emph{Disadvantages:} cannot analyze
+        visual propaganda; may miss important information in images.
+  \item \textbf{Multimodal Approach.} \emph{Advantages:} uses both text and image
+        information; more suitable for posts containing memes or image-based
+        messages. \emph{Disadvantages:} more complex; requires image data and
+        suitable multimodal models; requires more computational resources;
+        annotation becomes more difficult.
+  \item \textbf{Selected Approach:} The initial system focuses on Bangla text
+        detection so that the core pipeline can be developed and evaluated
+        properly. Multimodal support is investigated as an extension where
+        suitable image--text data are available. This follows the project's
+        iterative strategy: first make the core system reliable, then increase its
+        complexity.
+\end{itemize}
+
+\subsection{Design Rationale and Trade-off Evaluation}
+Table~\ref{tab:tradeoff} consolidates the alternatives above into a single
+evaluation matrix, stating for each design layer what was considered and why the
+selected option was chosen.
+
+\begingroup
+\small
+\renewcommand{\arraystretch}{1.3}
+\begin{longtable}{@{}L{2.9cm}L{3.9cm}L{6.1cm}@{}}
+\caption{Design rationale and trade-off evaluation matrix.}\label{tab:tradeoff}\\
+\toprule
+\textbf{Design Layer} & \textbf{Considered Alternative} & \textbf{Selected Choice \& Engineering Rationale}\\
+\midrule
+\endfirsthead
+\multicolumn{3}{@{}l}{\small\itshape Table~\thetable\ (continued)}\\
+\toprule
+\textbf{Design Layer} & \textbf{Considered Alternative} & \textbf{Selected Choice \& Engineering Rationale}\\
+\midrule
+\endhead
+\bottomrule
+\endlastfoot
+
+\textbf{Dataset Creation Strategy} & Fully manual annotation from scratch (10,000+ samples). &
+\textbf{Hybrid LLM pre-annotation + human verification:} reduces manual annotator fatigue and labeling cost while preserving ground-truth fidelity through expert human sign-off~\cite{maarouf2024}.\\
+\addlinespace
+\textbf{Annotation Authority} & Fully autonomous LLM zero-shot labeling. &
+\textbf{Human-in-the-loop ground truth:} pure LLM labels can suffer from hallucination and cultural blindness in Bangla idioms; human verification protects label quality~\cite{hasan2026,maarouf2024}.\\
+\addlinespace
+\textbf{Core NLP Backbone} & Classical machine learning (TF-IDF + SVM / Naive Bayes). &
+\textbf{Fine-tuned pretrained transformers (BanglaBERT \& XLM-R):} capture bidirectional contextual semantics, sarcasm, and rhetorical nuance that $n$-gram models miss. Classical ML is retained strictly as the E1 baseline.\\
+\addlinespace
+\textbf{Monolingual vs.\ Multilingual} & Generic multilingual models only (mBERT / XLM-R). &
+\textbf{Dual evaluation (BanglaBERT vs.\ XLM-R):} BanglaBERT provides vocabulary specialization for Bengali script, while XLM-R tests cross-lingual robustness against code-mixed Bangla--English text.\\
+\addlinespace
+\textbf{Modality Scope} & Full multimodal (video + audio + text + network) from day one. &
+\textbf{Phased, extensible modular architecture:} Phase~1 establishes robust text detection and dataset verification; Phase~2 adds image--text meme fusion; Phase~3 integrates graph-based coordination metrics.\\
+\addlinespace
+\textbf{Class Imbalance Strategy} & Standard cross-entropy on the raw class distribution. &
+\textbf{Cost-sensitive loss weighting + strategic oversampling:} prevents bias toward the dominant ``No Propaganda'' class and supports viable recall on minority techniques (e.g., Bandwagon, Fear Appeal).\\
+\end{longtable}
+\endgroup
+
+\subsection{Dataset Design}
+The dataset design follows a three-stage methodology:
+\begin{itemize}
+  \item \textbf{Stage 1: Existing Dataset.} Existing publicly available Bangla
+        datasets are used to develop and test the initial pipeline.
+  \item \textbf{Stage 2: Custom Dataset.} Approximately 500--1,000 Bangla samples
+        will initially be collected from appropriate public sources.
+  \item \textbf{Stage 3: Dataset Improvement.} After model evaluation,
+        underrepresented classes will be identified and additional real examples
+        will be collected where necessary. Synthetic augmentation may be
+        investigated only when real examples remain insufficient, following the
+        workflow
+        \[\text{Generate}\rightarrow\text{Filter}\rightarrow\text{Human Check}\rightarrow\text{Training Use}.\]
+        Synthetic examples will be stored separately from real-world examples
+        during evaluation.
+\end{itemize}
+
+\subsection{Annotation Design}
+The annotation system is based on a two-level process:
+\begin{itemize}
+  \item \textbf{Level 1: LLM Pre-Annotation.} The LLM receives a Bangla sample and
+        suggests whether propaganda may be present, the possible propaganda
+        technique, confidence or certainty, and a short explanation.
+  \item \textbf{Level 2: Human Verification.} The human annotator checks the
+        prediction and assigns the final label.
+\end{itemize}
+The final dataset therefore contains
+\[\text{Original Text}+\text{LLM Suggestion}+\text{Human Decision}+\text{Final Label}.\]
+This information can also help researchers analyze where the LLM performs well or
+poorly.
+
+\subsection{Class Imbalance Design}
+The dataset may contain significantly different numbers of examples for different
+propaganda categories. For example: \emph{No Propaganda}: 700; \emph{Loaded
+Language}: 100; \emph{Fear Appeal}: 40; \emph{Bandwagon}: 20; \emph{Other}: 10.
+The project will monitor class distributions after each data-collection cycle.
+Possible solutions include:
+\begin{enumerate}
+  \item \textbf{Additional real-data collection:} more minority-class examples will
+        be collected where possible.
+  \item \textbf{Class weighting:} the training algorithm may assign greater
+        importance to minority classes.
+  \item \textbf{Oversampling:} minority examples may be sampled more frequently
+        during training.
+  \item \textbf{Synthetic augmentation:} LLM-generated examples may be investigated
+        after human filtering.
+\end{enumerate}
+The chosen technique will be determined experimentally rather than assumed to be
+effective in advance.
+
+\subsection{Training and Testing Design}
+\begin{itemize}
+  \item The human-verified dataset will be divided into \textbf{training},
+        \textbf{validation}, and \textbf{test} subsets.
+  \item The training set will be used for model learning.
+  \item The validation set will be used for model selection and parameter tuning.
+  \item The test set will be kept separate and used for final evaluation.
+  \item The test data must not be used during training or annotation decisions in a
+        way that causes data leakage.
+\end{itemize}
+
+\subsection{Experimental Design}
+The project will compare multiple approaches rather than reporting only one model.
+The experimental structure is shown in Table~\ref{tab:experiments}.
+
+\begin{table}[H]
+\centering
+\caption{Experimental design.}\label{tab:experiments}
+\renewcommand{\arraystretch}{1.25}
+\begin{tabular}{@{}cl@{}}
+\toprule
+\textbf{Experiment} & \textbf{Approach}\\
+\midrule
+E1 & Traditional ML baseline\\
+E2 & BanglaBERT\\
+E3 & XLM-R\\
+E4 & BanglaBERT + class-imbalance strategy\\
+E5 & XLM-R + class-imbalance strategy\\
+E6 & Optional LLM-assisted / synthetic augmentation experiment\\
+\bottomrule
+\end{tabular}
+\end{table}
+The final selection will be based on measured performance rather than assuming that
+the most complex model will perform best.
+
+\subsection{Evaluation Design}
+The main performance measures will be:
+\begin{itemize}
+  \item \textbf{Accuracy:} overall proportion of correctly classified examples.
+  \item \textbf{Precision:} how many predicted positive examples are actually positive.
+  \item \textbf{Recall:} how many actual positive examples are correctly detected.
+  \item \textbf{F1-score:} the harmonic mean of precision and recall.
+\end{itemize}
+For an imbalanced multi-class dataset, \textbf{macro-F1} and \textbf{class-wise
+F1-score} will receive particular attention because they provide a clearer view of
+minority-class performance. A confusion matrix will also be used to identify which
+propaganda categories are commonly confused with one another.
+
+\subsection{Error Analysis}
+After evaluation, incorrectly classified examples will be manually inspected. The
+researchers will investigate whether errors are caused by ambiguous language,
+sarcasm, insufficient training examples, class imbalance, cultural context,
+code-mixing, similar propaganda categories, or limitations of the selected model.
+The error analysis will guide the next iteration of dataset collection and model
+training.
+
+\subsection{Final System Architecture}
+The final proposed architecture is divided into two connected parts: a research
+pipeline responsible for building and improving the model, and a user application
+that uses the trained model to provide predictions (Figure~\ref{fig:arch}).
+
+\begin{figure}[H]
+\centering
+\begin{adjustbox}{max width=\textwidth}
+\begin{tikzpicture}
+% ===== Research pipeline
+\node[blk]   (ds)  at (-5.1, 0.0) {Data Sources};
+\node[blk]   (dc)  at (-1.7, 0.0) {Data Collection};
+\node[blk]   (dp)  at ( 1.7, 0.0) {Pre-processing};
+\node[blk]   (lpa) at ( 5.1, 0.0) {LLM Pre-Annotation};
+\node[blk]   (hv)  at ( 5.1,-1.9) {Human Verification};
+\node[store] (vd)  at ( 1.7,-1.9) {Verified Dataset};
+\node[blk]   (mt)  at (-1.7,-1.9) {Model Training};
+\node[blk]   (ev)  at (-1.7,-3.8) {Evaluation};
+\node[blk]   (mi)  at (-5.1,-3.8) {Model Improvement};
+\draw[grp] (-6.8,0.95) rectangle (6.8,-4.75);
+\node[grptitle,anchor=south west] at (-6.8,0.95) {Research Pipeline};
+\draw[flow] (ds) -- (dc);  \draw[flow] (dc) -- (dp);  \draw[flow] (dp) -- (lpa);
+\draw[flow] (lpa) -- (hv); \draw[flow] (hv) -- (vd);  \draw[flow] (vd) -- (mt);
+\draw[flow] (mt) -- (ev);  \draw[flow] (ev) -- (mi);
+\draw[dflow] (mi.north) -- (-5.1,-0.95) -| (dc.south);
+\node[lab,anchor=west] at (-5.0,-2.3) {iterate};
+
+% ===== User application
+\node[ext]  (u)   at ( 5.1,-7.5) {User};
+\node[blk]  (bti) at ( 1.7,-7.5) {Bangla Text Input};
+\node[blk]  (up)  at (-1.7,-7.5) {Pre-processing};
+\node[proc] (tpm) at (-5.1,-7.5) {Trained Propaganda Model};
+\node[blk]  (pr)  at (-5.1,-9.4) {Prediction};
+\node[blk]  (tce) at (-1.7,-9.4) {Technique / Confidence / Explanation};
+\node[blk]  (res) at ( 1.7,-9.4) {User Result Display};
+\draw[grp] (-6.8,-6.55) rectangle (6.8,-10.35);
+\node[grptitle,anchor=south east] at (6.8,-6.55) {User Application};
+\draw[flow] (u) -- (bti);  \draw[flow] (bti) -- (up);  \draw[flow] (up) -- (tpm);
+\draw[flow] (tpm) -- (pr); \draw[flow] (pr) -- (tce);  \draw[flow] (tce) -- (res);
+
+% deploy link
+\draw[dflow] (ev.south) -- (-1.7,-5.6) -| (tpm.north);
+\node[lab,above] at (-3.4,-5.6) {deploy model};
+\end{tikzpicture}
+\end{adjustbox}
+\caption{Final system architecture: research pipeline and user application.}
+\label{fig:arch}
+\end{figure}
+
+\subsection{Why the Proposed Design Was Selected}
+The proposed design was selected because it balances research reliability,
+development effort, scalability, and practicality. Using existing datasets allows
+the technical pipeline to be developed early. Creating a smaller custom dataset
+makes it possible to focus annotation effort on data specifically relevant to
+Bangla propaganda detection. Using an LLM for pre-annotation reduces repetitive
+work, while human verification protects the quality of the ground-truth labels.
+
+Similarly, using traditional machine learning as a baseline and transformer models
+as the main candidates allows meaningful comparison between simple and advanced
+approaches. Starting with text-based detection keeps the initial implementation
+manageable, while the architecture leaves room for future multimodal expansion.
+The overall design is therefore iterative:
+\[\text{Build}\rightarrow\text{Test}\rightarrow\text{Analyze}\rightarrow\text{Improve}\rightarrow\text{Retrain}\rightarrow\text{Re-evaluate}.\]
+This makes it possible to improve both the dataset and the model throughout the
+project instead of expecting the first version to be perfect.
+
+% ---------------------------------------------------------------------
+\section{Project Plan}
+\label{sec:plan}
+The project lifecycle is planned across three consecutive academic trimesters
+(25 weeks), structured into four distinct engineering phases. The schedule is shown
+as a Gantt chart in Figure~\ref{fig:gantt}.
+
+\begin{figure}[H]
+\centering
+\begin{adjustbox}{max width=\textwidth}
+\begin{ganttchart}[
+    hgrid, vgrid={*{4}{draw=none},dotted},
+    x unit=0.42cm, y unit chart=0.6cm, y unit title=0.55cm,
+    title height=1, title label font=\tiny\bfseries,
+    bar height=0.55, bar label font=\scriptsize,
+    group label font=\scriptsize\bfseries,
+    bar/.append style={fill=uiublue!70,draw=uiublue},
+    group/.append style={fill=uiublue!35,draw=uiublue},
+    bar label node/.append style={text width=5.8cm,align=right,anchor=east,font=\scriptsize\RaggedLeft},
+    group label node/.append style={text width=5.8cm,align=right,anchor=east,font=\scriptsize\bfseries\RaggedLeft}
+  ]{1}{25}
+  \gantttitle{Weeks 1--25}{25}\\
+  \gantttitlelist{1,...,25}{1}\\
+  \ganttgroup{Phase 1: Planning}{1}{8}\\
+  \ganttbar{Literature Review \& Taxonomy}{1}{8}\\
+  \ganttbar{Requirements \& Architecture Spec.}{3}{8}\\
+  \ganttgroup{Phase 2: Data Pipeline}{5}{16}\\
+  \ganttbar{Web Scraping \& Data Ingestion}{5}{14}\\
+  \ganttbar{LLM Pre-Annotation Prompting}{7}{12}\\
+  \ganttbar{Human Expert Annotation \& Verification}{9}{16}\\
+  \ganttgroup{Phase 3: Modeling \& Evaluation}{15}{22}\\
+  \ganttbar{Classical Baselines (SVM/NB)}{15}{18}\\
+  \ganttbar{BanglaBERT \& XLM-R Fine-Tuning}{16}{21}\\
+  \ganttbar{Class Imbalance Mitigation \& Testing}{18}{22}\\
+  \ganttgroup{Phase 4: UI \& Deployment}{20}{25}\\
+  \ganttbar{Explainability Module \& UI Dashboard}{20}{24}\\
+  \ganttbar{Benchmarking \& Final Thesis Draft}{22}{25}
+\end{ganttchart}
+\end{adjustbox}
+\caption{Gantt chart of the project execution lifecycle (Weeks 1--25).}
+\label{fig:gantt}
+\end{figure}
+
+\begin{itemize}
+  \item \textbf{Phase 1: Requirements Gathering \& Taxonomy Definition (Weeks
+        1--8).} Systematic review of propaganda literature, defining the Bangla
+        propaganda technique taxonomy, and architecting the DFD.
+  \item \textbf{Phase 2: Data Curation \& Hybrid Annotation (Weeks 5--16).}
+        Gathering raw posts, prompt engineering for LLM pre-annotation, and
+        conducting human expert verification to construct the verified dataset.
+  \item \textbf{Phase 3: Model Training \& Experimental Benchmarking (Weeks
+        15--22).} Fine-tuning BanglaBERT and XLM-R, implementing cost-sensitive
+        loss weighting, and conducting ablation experiments E1--E6.
+  \item \textbf{Phase 4: Dashboard Integration \& Final Thesis (Weeks 20--25).}
+        Integrating the prediction engine with the web user interface, generating
+        explainability summaries, and writing the final thesis report.
+\end{itemize}
+
+\section{Task Allocation}
+\label{sec:tasks}
+Project responsibilities are divided among team members according to technical
+sub-disciplines:
+\begin{itemize}
+  \item \textbf{Shekh Abdullah Al Mehedi (ID: 112231075):} data pipeline
+        architecture, automated web scraping infrastructure, data
+        cleaning/normalization, and database management.
+  \item \textbf{Mahjabin Khan (ID: 112230177):} annotation pipeline design, LLM
+        prompt engineering for pre-annotation, annotator guideline drafting, and
+        human verification coordination.
+  \item \textbf{Omor Faruck Ullas (ID: 112310384):} machine learning pipeline,
+        transformer model fine-tuning (BanglaBERT \& XLM-R), class imbalance
+        mitigation, and loss function engineering.
+  \item \textbf{Md.\ Rayan Rahman (ID: 112331071):} system evaluation, benchmarking
+        experiments (E1--E6), confusion matrix error analysis, and web UI/API
+        development.
+\end{itemize}
+
+% =====================================================================
+%                            CHAPTER 4
+% =====================================================================
+\chapter{Standards and Design Constraints}
+\label{ch:standards}
+
+This chapter details the engineering standards, real-world design constraints,
+financial budget analysis, and formal mapping to Washington Accord / BAETE Complex
+Engineering Problem Solving criteria guiding the development of the Bangla
+propaganda detection framework.
+
+\section{Compliance with Standards}
+To ensure reproducibility, maintainability, and interoperability, the project
+adheres to established technical standards.
+
+\subsection{Software Standards}
+\begin{itemize}
+  \item Adherence to \textbf{PEP~8} style guidelines for all Python modules.
+  \item Utilization of standardized machine learning frameworks (\textbf{PyTorch},
+        \textbf{Hugging Face Transformers}) to ensure cross-platform
+        reproducibility.
+  \item Implementation of \textbf{RESTful API} conventions using FastAPI/Flask and
+        \textbf{JSON Schema} for structured data exchange.
+\end{itemize}
+
+\subsection{Hardware and Cloud Standards}
+\begin{itemize}
+  \item Compliance with standard GPU computing interfaces (CUDA~12.x, OpenCL) to
+        allow portable training across both local workstations and cloud
+        infrastructure.
+\end{itemize}
+
+\subsection{Communication and Security Standards}
+\begin{itemize}
+  \item Enforcing \textbf{HTTPS (TLS~1.3)} encryption for all web interface
+        interactions and API queries.
+  \item Adoption of the \textbf{Schema.org ClaimReview} structured data standard to
+        ensure interoperability with international fact-checking
+        platforms~\cite{google_claimreview}.
+\end{itemize}
+
+\section{Realistic Design Constraints}
+
+\subsection{Economic Constraint}
+Academic and independent journalistic organizations in Bangladesh operate under
+strict financial limits. The framework avoids dependence on proprietary per-token
+cloud APIs (e.g., proprietary LLM inference) for runtime detection. Instead, the
+final model is fine-tuned into open-weight transformer backbones (BanglaBERT)
+capable of low-cost local or edge deployment.
+
+\subsection{Environmental Constraint}
+Training large generative architectures from scratch consumes enormous electrical
+power. We constrain our carbon footprint by utilizing transfer learning ---
+fine-tuning existing open-source pretrained representations rather than training
+models from scratch.
+
+\subsection{Ethical Constraint}
+Detecting political propaganda carries significant ethical risks regarding
+censorship, freedom of speech, and algorithmic political bias. To uphold ethical
+standards:
+\begin{itemize}
+  \item The system outputs probability confidence scores and explainable rationale
+        rather than absolute binary judgments.
+  \item Training data is balanced across diverse political viewpoints to prevent
+        partisan favoritism.
+  \item Public data collection strictly complies with platform Terms of Service,
+        and personal identifiers are anonymized.
+\end{itemize}
+
+\subsection{Health and Safety Constraint}
+While software does not cause direct physical harm, coordinated disinformation in
+Bangladesh has repeatedly triggered real-world communal violence and riots.
+Erroneous detection could amplify panic or silence legitimate reporting. The system
+incorporates human-in-the-loop review safeguards before high-consequence moderation
+flags are triggered.
+
+\subsection{Social Constraint}
+The tool is designed to empower citizens, journalists, and researchers to think
+independently rather than having their views manipulated by coordinated actors. The
+user interface is crafted in clear, accessible Bangla to serve users across varying
+levels of technical literacy.
+
+\subsection{Political Constraint}
+The project operates strictly within the legal bounds of Bangladesh's Cyber Security
+Act and digital data protection policies, maintaining neutrality and strictly
+avoiding algorithmic political profiling.
+
+\subsection{Sustainability}
+The framework relies exclusively on open-source libraries and open-weight models,
+ensuring that the software can be maintained, adapted, and extended by the research
+community without ongoing commercial licensing fees.
+
+\section{Cost Analysis}
+
+\subsection{Proposed Budget}
+The proposed budget accounts for dedicated computational resources, data storage,
+and verification honorariums (Table~\ref{tab:budget1}).
+
+\begin{table}[H]
+\centering
+\caption{Proposed budget for the Bangla propaganda detection project.}\label{tab:budget1}
+\renewcommand{\arraystretch}{1.3}
+\begin{tabularx}{\textwidth}{@{}L{3.6cm}X r@{}}
+\toprule
+\textbf{Category} & \textbf{Description} & \textbf{Est.\ Cost (BDT)}\\
+\midrule
+Computational Resources & Dedicated GPU workstation time, RAM, and cloud compute subscriptions for transformer training & 1,80,000\\
+Data Collection \& Storage & Cloud database storage for the multimodal social media corpus and automated scraper hosting & 45,000\\
+Annotation \& Expert Verification & Honorarium for domain experts and linguists conducting ground-truth label verification & 60,000\\
+Miscellaneous \& Contingency & High-speed broadband data packages and unexpected contingency expenses & 5,000\\
+\midrule
+\multicolumn{2}{@{}l}{\textbf{Total}} & \textbf{2,90,000}\\
+\bottomrule
+\end{tabularx}
+\end{table}
+
+\subsection{Alternate Budget and Rationale}
+To accommodate severe financial constraints, an alternate low-cost budget leveraging
+free academic resources is established (Table~\ref{tab:budget2}).
+
+\begin{table}[H]
+\centering
+\caption{Alternate low-cost budget.}\label{tab:budget2}
+\renewcommand{\arraystretch}{1.3}
+\begin{tabularx}{\textwidth}{@{}L{3.6cm}X r@{}}
+\toprule
+\textbf{Category} & \textbf{Description} & \textbf{Est.\ Cost (BDT)}\\
+\midrule
+Computational Resources & Free-tier Google Colab (T4 GPUs) and UIU Department computer-lab workstations & 0\\
+Data Collection \& Storage & Local workstation hard-drive storage and university Google Drive allocation & 0\\
+Annotation \& Verification & Internal student-team manual verification under faculty supervision & 0\\
+Miscellaneous & Contingency buffer & 2,500\\
+\midrule
+\multicolumn{2}{@{}l}{\textbf{Total}} & \textbf{2,500}\\
+\bottomrule
+\end{tabularx}
+\end{table}
+
+\textbf{Rationale.} While the alternate budget incurs near-zero financial cost, the
+Proposed Budget (Table~\ref{tab:budget1}) is strongly preferred. Training deep
+transformer networks on free Colab instances suffers from frequent kernel
+disconnects, timeouts, and limited GPU memory. Dedicated resources guarantee
+reliable experimental reproducibility.
+
+\subsection{Sustainability and Post-FYDP Revenue Model}
+To sustain the platform after project completion:
+\begin{enumerate}
+  \item \textbf{Open-Source Core:} the trained model weights and benchmark dataset
+        are freely released to the academic community.
+  \item \textbf{B2B / API Licensing for Newsrooms:} offering an automated
+        verification API to independent digital newsrooms and fact-checking
+        organizations in Bangladesh under a software-as-a-service (SaaS)
+        subscription model.
+  \item \textbf{Grant Funding:} seeking research grants from organizations focused
+        on digital literacy, counter-disinformation, and low-resource NLP.
+\end{enumerate}
+
+\section{Complex Engineering Problem (BAETE / Washington Accord)}
+
+\subsection{Complex Problem Solving Mapping}
+The project is mapped against the Washington Accord complex engineering problem
+criteria (P1--P7) in Table~\ref{tab:p1p7}.
+
+\begin{table}[H]
+\centering
+\caption{Mapping with complex problem solving criteria (P1--P7).}\label{tab:p1p7}
+\renewcommand{\arraystretch}{1.5}
+\resizebox{\textwidth}{!}{%
+\begin{tabular}{@{}c|c|c|c|c|c|c|c@{}}
+\toprule
+\textbf{Attribute} & \makecell{\textbf{P1}\\Depth of\\Knowledge} & \makecell{\textbf{P2}\\Conflicting\\Requirements} & \makecell{\textbf{P3}\\Depth of\\Analysis} & \makecell{\textbf{P4}\\Familiarity\\of Issues} & \makecell{\textbf{P5}\\Applicable\\Codes} & \makecell{\textbf{P6}\\Stakeholder\\Involvement} & \makecell{\textbf{P7}\\Inter-\\dependence}\\
+\midrule
+\textbf{Status} & \ck & \ck & \ck & \ck & \ck & \ck & \ck\\
+\bottomrule
+\end{tabular}}
+\end{table}
+
+\begin{itemize}
+  \item \textbf{P1: Depth of Knowledge Required.} Synthesizes Natural Language
+        Processing (transformers, attention mechanisms), multimodal computer vision
+        (ViT, ResNet), graph theory (coordinated social networks), and linguistic
+        rhetoric. Aligns with \textbf{WK3} (advanced engineering knowledge) and
+        \textbf{WK4} (specialist AI/ML architecture knowledge).
+  \item \textbf{P2: Range of Conflicting Requirements.} Balancing deep contextual
+        accuracy with computational inference latency; balancing aggressive
+        propaganda detection with the protection of free speech and political
+        satire.
+  \item \textbf{P3: Depth of Analysis Required.} In-depth modeling of subtle
+        rhetorical propaganda techniques (loaded language, fear appeals,
+        bandwagon) in morphologically rich, code-mixed Bangla text.
+  \item \textbf{P4: Familiarity of Issues.} Detecting coordinated propaganda
+        campaigns in under-resourced Bangla digital media is largely uncharted
+        territory compared to standard English fake-news benchmarks.
+  \item \textbf{P5: Extent of Applicable Codes.} Strict adherence to data privacy,
+        digital copyright, platform terms of service, and ethical AI fairness
+        standards.
+  \item \textbf{P6: Extent of Stakeholder Involvement.} Involves diverse
+        stakeholders including digital media consumers, journalists, academic
+        researchers, and content moderators.
+  \item \textbf{P7: Inter-dependence.} High inter-dependence across web scraping,
+        preprocessing, hybrid annotation, transformer fine-tuning, and user result
+        generation; an error or bias in annotation ripples through the entire
+        classification pipeline.
+\end{itemize}
+
+\subsection{Complex Engineering Activities Mapping}
+The project is mapped against the complex engineering activity attributes
+(A1--A5) in Table~\ref{tab:a1a5}.
+
+\begin{table}[H]
+\centering
+\caption{Mapping with complex engineering activities (A1--A5).}\label{tab:a1a5}
+\renewcommand{\arraystretch}{1.5}
+\begin{tabular}{@{}c|c|c|c|c|c@{}}
+\toprule
+\textbf{Attribute} & \makecell{\textbf{A1}\\Range of\\Resources} & \makecell{\textbf{A2}\\Level of\\Interaction} & \makecell{\textbf{A3}\\Innovation} & \makecell{\textbf{A4}\\Consequences\\for Society} & \makecell{\textbf{A5}\\Familiarity}\\
+\midrule
+\textbf{Status} & \ck & \ck & \ck & \ck & \ck\\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\begin{itemize}
+  \item \textbf{A1: Range of Resources.} GPU clusters, cloud storage, large-scale
+        web scrapers, transformer toolkits, and human expert linguistic annotators.
+  \item \textbf{A2: Level of Interaction.} Continuous synergy between computational
+        NLP subsystems and human domain experts during the two-tier verification
+        workflow.
+  \item \textbf{A3: Innovation.} Novel hybrid LLM--human annotation paradigm and
+        multi-faceted coordinated campaign detection framework tailored
+        specifically to Bangla online media.
+  \item \textbf{A4: Consequences for Society and Environment.} Substantial societal
+        impact in safeguarding civic discourse and countering dangerous communal
+        manipulation in Bangladesh.
+  \item \textbf{A5: Familiarity.} Requires innovative adaptation of cross-lingual
+        transfer learning to overcome the severe data scarcity characteristic of
+        low-resource Bangla NLP.
+\end{itemize}
+
+\section{Summary}
+This chapter formalized the engineering standards, realistic constraints, economic
+feasibility budgets, and rigorous BAETE accreditation mappings that validate this
+research as a comprehensive complex engineering capstone project.
+
+% =====================================================================
+%                            BIBLIOGRAPHY
+% =====================================================================
+\clearpage
+\phantomsection
+\addcontentsline{toc}{chapter}{Bibliography}
+\begin{thebibliography}{99}
+\setlength{\itemsep}{3pt}
+
+\bibitem{hristakieva2022} K.~Hristakieva, S.~Cresci, G.~Da San Martino, M.~Conti, and P.~Nakov, ``The spread of propaganda by coordinated communities on social media,'' in \emph{Proceedings of the 14th ACM Web Science Conference 2022 (WebSci '22)}. Association for Computing Machinery, 2022, pp.~191--201.
+
+\bibitem{hossain2020} M.~Z. Hossain, M.~A. Rahman, M.~S. Islam, and S.~Kar, ``BanFakeNews: A dataset for detecting fake news in Bangla,'' in \emph{Proceedings of the Twelfth Language Resources and Evaluation Conference}. European Language Resources Association, 2020, pp.~2862--2871.
+
+\bibitem{kamruzzaman2023} M.~Kamruzzaman, M.~M.~I. Shovon, and G.~Kim, ``BanMANI: A dataset to identify manipulated social media news in Bangla,'' in \emph{Proceedings of the Workshop on Computational Terminology in NLP and Translation Studies (ConTeNTS) Incorporating the 16th Workshop on Building and Using Comparable Corpora (BUCC)}. Shoumen, Bulgaria: INCOMA Ltd., 2023, pp.~51--58.
+
+\bibitem{ng2023} K.~W. Ng and A.~Iamnitchi, ``Coordinated information campaigns on social media: A multifaceted framework for detection and analysis,'' in \emph{Disinformation in Open Online Media}. Springer Nature Switzerland, 2023, pp.~103--118.
+
+\bibitem{duridi2025} T.~Duridi, L.~Atwe, A.~Jaber, E.~Daraghmi, and P.~Mart\'inez, ``Detection of propaganda and bias in social media: A case study of the Israel--Gaza war (2023),'' in \emph{Proceedings of the 2025 International Conference on New Trends in Computing Sciences (ICTCS)}, 2025.
+
+\bibitem{plikynas2025} D.~Plikynas, I.~Rizgelien\.e, and G.~Korvel, ``Systematic review of fake news, propaganda, and disinformation: Examining authors, content, and social impact through machine learning,'' \emph{IEEE Access}, vol.~13, pp.~17\,583--17\,629, 2025.
+
+\bibitem{lora2023} S.~K. Lora, I.~Jahan, R.~Hussain, R.~Shahriyar, and A.~B.~M.~A. Al Islam, ``A transformer-based generative adversarial learning to detect sarcasm from Bengali text with correct classification of confusing text,'' \emph{Heliyon}, vol.~9, no.~12, 2023.
+
+\bibitem{hasan2026} M.~A. Hasan, F.~Alam, M.~F. Hossain, U.~Naseem, and S.~I. Ahmed, ``LLM-based multi-task Bangla hate speech detection: Type, severity, and target,'' in \emph{Proceedings of the 64th Annual Meeting of the Association for Computational Linguistics (ACL)}, 2026, pp.~33\,962--33\,980.
+
+\bibitem{ahmad2025} P.~N. Ahmad, J.~Guo, N.~M. AboElenein, Q.~M. ul~Haq, S.~Ahmad, A.~D. Algarni, and A.~A. Ateya, ``Hierarchical graph-based integration network for propaganda detection in textual news articles on social media,'' \emph{Scientific Reports}, vol.~15, 2025.
+
+\bibitem{lin2024} S.-Y. Lin, Y.-C. Chen, Y.-H. Chang, S.-H. Lo, and K.-M. Chao, ``Text-image multimodal fusion model for enhanced fake news detection,'' \emph{Science Progress}, 2024.
+
+\bibitem{hee2022} M.~S. Hee, R.~K.-W. Lee, and W.-H. Chong, ``On explaining multimodal hateful meme detection models,'' in \emph{Proceedings of the ACM Web Conference (WWW)}, 2022, pp.~3651--3655.
+
+\bibitem{declerck2024} B.~De~Clerck, J.~C. Fernandez~Toledano, F.~Van Utterbeeck, and L.~E.~C. Rocha, ``Detecting coordinated and bot-like behavior in Twitter: The J\"urgen Conings case,'' \emph{EPJ Data Science}, vol.~13, no.~1, 2024.
+
+\bibitem{sela2025} A.~Sela, O.~Neter, V.~Lohr, P.~Cihelka, F.~Wang, M.~Zwilling, J.~P. Sabou, and M.~Ulman, ``Signals of propaganda---detecting and estimating political influences in information spread in social networks,'' \emph{PLOS ONE}, vol.~20, 2025.
+
+\bibitem{schneider2026} P.~J. Schneider, L.~Yuan, and M.-A. Rizoiu, ``Beyond content: Behavioral policies reveal actors in information operations,'' \emph{npj Complexity}, 2026.
+
+\bibitem{romim2022} N.~Romim, M.~Ahmed, M.~S. Islam, A.~Sen~Sharma, H.~Talukder, and M.~R. Amin, ``BD-SHS: A benchmark dataset for learning to detect online Bangla hate speech in different social contexts,'' in \emph{Proceedings of the 13th Language Resources and Evaluation Conference (LREC)}, 2022, pp.~5153--5162.
+
+\bibitem{google_factcheck} Google, ``Fact check tools API,'' Google for Developers. [Online]. Available: \url{https://developers.google.com/fact-check/tools/api}
+
+\bibitem{google_claimreview} Google, ``Fact check (ClaimReview) structured data,'' Google Search Central. [Online]. Available: \url{https://developers.google.com/search/docs/appearance/structured-data/factcheck}
+
+\bibitem{haider2020} S.~Haider, L.~Luceri, A.~Deb, A.~Badawy, N.~Peng, and E.~Ferrara, ``Detecting social media manipulation in low-resource languages,'' 2020.
+
+\bibitem{wang2022} M.-H. Wang, W.-Y. Chang, K.-H. Kuo, and K.-Y. Tsai, ``Analyzing image-based political propaganda in referendum campaigns: From elements to strategies,'' 2022.
+
+\bibitem{pina2025} C.~A. Pi\~na-Garc\'ia, ``In-context learning for propaganda detection on Twitter Mexico using large language model Meta AI,'' \emph{Telematics and Informatics Reports}, vol.~19, 2025.
+
+\bibitem{gaeta2025} A.~Gaeta, V.~Loia, A.~Lorusso, F.~Orciuoli, and A.~Pascuzzo, ``Towards a LLM-based intelligent system for detecting propaganda within textual content,'' \emph{Computers \& Electrical Engineering}, vol.~128, 2025.
+
+\bibitem{maarouf2024} A.~Maarouf, D.~B\"ar, D.~Geissler, and S.~Feuerriegel, ``HQP: A human-annotated dataset for detecting online propaganda,'' in \emph{Findings of the Association for Computational Linguistics: ACL 2024}, 2024, pp.~6064--6089.
+
+\end{thebibliography}
+
+\end{document}
