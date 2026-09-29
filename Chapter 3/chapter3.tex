@@ -1,0 +1,694 @@
+\chapter{Project Design}
+\label{ch:design}
+
+\section{Project Design Overview}
+This chapter presents the design of the proposed Bangla propaganda detection
+system. It describes the system requirements, overall interaction and data flow,
+user-interface design, the detailed methodology (including alternative solutions
+considered and the reasons for selecting the proposed approach), the project plan,
+and the allocation of tasks among team members.
+
+\section{Requirement Analysis}
+Requirement analysis identifies what the proposed system should do and what
+constraints it should satisfy. The requirements are divided into functional and
+nonfunctional requirements, followed by diagrams showing how users, data, and
+system components interact.
+
+\subsection{Functional and Nonfunctional Requirements}
+
+\subsubsection*{Functional Requirements}
+\begin{itemize}
+  \item \textbf{FR1: User Input.} The system shall allow a user to enter or submit
+        Bangla text for analysis.
+  \item \textbf{FR2: Text Preprocessing.} The system shall clean and prepare the
+        submitted Bangla text before sending it to the detection model.
+  \item \textbf{FR3: Propaganda Detection.} The system shall analyze the input text
+        and determine whether propaganda is present.
+  \item \textbf{FR4: Propaganda Technique Identification.} When propaganda is
+        detected, the system should identify the possible propaganda technique,
+        such as loaded language, fear appeal, or bandwagon, based on the final
+        label set used in the dataset.
+  \item \textbf{FR5: Result Display.} The system shall display the prediction
+        clearly to the user (Input: Bangla social-media text; Prediction:
+        Propaganda Detected; Technique: Loaded Language).
+  \item \textbf{FR6: Confidence Information.} The system may display a confidence
+        score or confidence level associated with the prediction.
+  \item \textbf{FR7: Dataset Management.} The research component of the system
+        shall support the collection, cleaning, annotation, verification, and
+        storage of Bangla propaganda examples.
+  \item \textbf{FR8: LLM-Assisted Pre-Annotation.} The dataset-development
+        pipeline shall allow an LLM to generate an initial label suggestion for
+        collected Bangla content.
+  \item \textbf{FR9: Human Verification.} The system or research workflow shall
+        allow a human annotator to review and correct the LLM's suggested label.
+  \item \textbf{FR10: Model Training.} The research pipeline shall support training
+        and fine-tuning of the selected propaganda detection model using the
+        human-verified dataset.
+  \item \textbf{FR11: Model Evaluation.} The system shall calculate evaluation
+        measures including accuracy, precision, recall, and F1-score.
+  \item \textbf{FR12: Iterative Dataset Improvement.} The research workflow shall
+        identify poorly performing classes and allow additional data to be
+        collected or generated and verified.
+\end{itemize}
+
+\subsubsection*{Nonfunctional Requirements}
+\begin{itemize}
+  \item \textbf{NFR1: Usability.} The user interface should be simple enough that a
+        user can submit Bangla text and understand the prediction without
+        technical knowledge.
+  \item \textbf{NFR2: Performance.} The system should provide predictions within a
+        reasonable response time for normal user requests.
+  \item \textbf{NFR3: Reliability.} The system should provide consistent results
+        when the same input is analyzed under the same model configuration.
+  \item \textbf{NFR4: Accuracy.} The model should achieve acceptable performance
+        according to the selected evaluation metrics.
+  \item \textbf{NFR5: Maintainability.} The system should be designed so that the
+        detection model and dataset can be updated without rebuilding the complete
+        application.
+  \item \textbf{NFR6: Scalability.} The architecture should allow the dataset and
+        model to grow beyond the initial 500--1,000 custom samples.
+  \item \textbf{NFR7: Security.} User-submitted data and research data should be
+        handled securely and unnecessary personal information should not be stored.
+  \item \textbf{NFR8: Explainability.} Where feasible, the system should provide
+        useful information about why a text was classified as potentially
+        propagandistic rather than displaying only a class label.
+  \item \textbf{NFR9: Language Support.} The main detection workflow shall support
+        Bangla text.
+\end{itemize}
+
+% ---------------------------------------------------------------------
+\subsection{Context Diagram}
+The context diagram represents the proposed system as a single high-level process
+and shows its relationship with external entities. The main external entities are:
+\begin{enumerate}
+  \item \textbf{User:} \emph{User $\rightarrow$ System:} Bangla text.
+        \emph{System $\rightarrow$ User:} detection result, propaganda category,
+        and optional confidence information.
+  \item \textbf{Researcher / Administrator:} manages the research dataset and
+        model-development process. \emph{Researcher $\rightarrow$ System:} raw
+        data, annotation decisions, training configuration.
+        \emph{System $\rightarrow$ Researcher:} dataset information, model
+        results, evaluation metrics.
+  \item \textbf{LLM Service:} used during dataset development as a pre-annotation
+        assistant. \emph{System $\rightarrow$ LLM:} Bangla sample and annotation
+        prompt. \emph{LLM $\rightarrow$ System:} suggested label, possible
+        technique, and explanation. (The LLM output is \emph{not} considered the
+        final ground truth; human verification is strictly required.)
+  \item \textbf{External Data Sources:} publicly available datasets and other
+        permitted sources provide the initial and additional Bangla data used
+        during development. \emph{External Data Sources $\rightarrow$ System:}
+        Bangla text/images and associated metadata where available.
+\end{enumerate}
+
+\begin{figure}[H]
+  \centering
+  \includegraphics[width=0.90\textwidth]{Chapter 3/Context Diagram.png}
+  \caption{Context diagram --- the proposed system acts as the central component
+connecting the user, research workflow, external datasets, and the LLM-based
+annotation assistant.}
+  \label{fig:context}
+\end{figure}
+
+% ---------------------------------------------------------------------
+\subsection{Data Flow Diagram}
+\label{sec:dfd}
+
+\subsubsection{Level 1 Data Flow Diagram}
+The Level~1 Data Flow Diagram (DFD) expands the main system into its major internal
+processes and data stores.
+
+\paragraph{Processes.}
+\begin{itemize}
+  \item \textbf{P1: Data Collection and Management.} Collects Bangla data from
+        existing datasets and permitted online sources.
+  \item \textbf{P2: Data Preprocessing.} Cleans, normalizes, and prepares the
+        collected data.
+  \item \textbf{P3: LLM Pre-Annotation.} Sends the cleaned samples to the LLM and
+        receives possible propaganda labels and explanations.
+  \item \textbf{P4: Human Verification.} Allows the researcher or annotator to
+        review the LLM output and produce the final verified label.
+  \item \textbf{P5: Model Training.} Uses the verified dataset to fine-tune the
+        selected machine-learning model.
+  \item \textbf{P6: Model Evaluation.} Evaluates the trained model using accuracy,
+        precision, recall, F1-score, and class-wise performance.
+  \item \textbf{P7: User Prediction.} Receives new Bangla text from the user,
+        preprocesses it, sends it to the trained model, and returns the prediction.
+\end{itemize}
+
+\paragraph{Main data stores.}
+\begin{itemize}
+  \item \textbf{D1: Raw Dataset} --- collected Bangla data before processing.
+  \item \textbf{D2: Processed Dataset} --- cleaned and prepared data.
+  \item \textbf{D3: Human-Verified Dataset} --- final dataset with human-confirmed
+        labels.
+  \item \textbf{D4: Trained Model} --- the trained propaganda detection model.
+  \item \textbf{D5: Evaluation Results} --- performance measures and experimental
+        results.
+\end{itemize}
+
+\begin{figure}[H]
+  \centering
+  \includegraphics[height=15cm,keepaspectratio]{Chapter 3/DFD.png}
+  \caption{Level~1 Data Flow Diagram (DFD) --- the dual-workflow architecture: the
+research and model-development pipeline and the end-user prediction workflow.}
+  \label{fig:dfd1}
+\end{figure}
+
+\subsubsection{Detailed Level 2 Data Flow Diagram}
+\label{sec:dfd2}
+Figure~\ref{fig:dfd2} expands the Level~1 processes to show their internal
+processing. Processes~1 and~2 harvest and normalize both text and images.
+Processes~3 and~4 form the hybrid annotation engine, where few-shot prompts drive an
+LLM to produce candidate suggestions that are placed in a buffer and then verified
+by human annotators in a dedicated workspace before being written to the verified
+ground-truth store (D3). Process~5 tokenizes verified text, encodes it with a
+BanglaBERT/XLM-R backbone, encodes images with a ViT/ResNet extractor, and joins the
+two through a cross-modal attention fusion layer feeding the propaganda technique
+classification head. Processes~6 and~7 serve live user input through the inference
+engine and pair each prediction with a feature-attribution explainability module.
+
+\begin{figure}[H]
+\centering
+\begin{adjustbox}{max width=\textwidth,max height=0.86\textheight}
+\begin{tikzpicture}
+% ===== Processes 1 & 2
+\node[blk]  (raw)   at (-5.25, 0.0) {Raw Online Bangla Content};
+\node[proc] (scr)   at (-1.75, 0.0) {Automated Scraper \& API Harvester};
+\node[proc] (img)   at ( 1.75, 0.0) {Image Preprocessing: Normalization \& Resizing};
+\node[proc] (clean) at ( 1.75,-1.9) {Bangla Text Cleaner: Emoji, Punctuation, Normalizer};
+\draw[grp] (-6.8,0.95) rectangle (6.8,-2.85);
+\node[grptitle,anchor=south west] at (-6.8,0.95) {Processes 1 \& 2: Ingestion \& Preprocessing};
+\draw[flow] (raw) -- (scr);
+\draw[flow] (scr) -- (img);
+\draw[flow] (scr.south) |- (clean.west);
+
+% ===== Processes 3 & 4
+\node[proc]  (prompt) at ( 1.75,-4.5) {Few-Shot Prompt Constructor};
+\node[proc]  (llm)    at (-1.75,-4.5) {LLM Pre-Annotation API};
+\node[store] (buf)    at (-5.25,-4.5) {Candidate Suggestion Buffer};
+\node[proc]  (ui)     at (-5.25,-6.4) {Human Annotator Verification Workspace};
+\node[store] (gt)     at (-1.75,-6.4) {D3: Verified Ground-Truth Store};
+\draw[grp] (-6.8,-3.55) rectangle (6.8,-7.35);
+\node[grptitle,anchor=south west] at (-6.8,-3.55) {Processes 3 \& 4: Hybrid Annotation Engine};
+\draw[flow] (clean.south) -- (prompt.north);
+\draw[flow] (prompt) -- (llm);
+\draw[flow] (llm) -- (buf);
+\draw[flow] (buf) -- (ui);
+\draw[flow] (ui) -- (gt);
+
+% ===== Process 5
+\node[proc] (tok)  at (-1.75, -9.0) {Bangla WordPiece / SentencePiece Tokenizer};
+\node[proc] (bb)   at ( 1.75, -9.0) {BanglaBERT / XLM-R Transformer Backbone};
+\node[proc] (fuse) at ( 1.75,-10.9) {Cross-Modal Attention Fusion Layer};
+\node[proc] (vit)  at ( 5.25,-10.9) {Vision Transformer / ResNet Visual Extractor};
+\node[proc] (cls)  at (-1.75,-10.9) {Propaganda Technique Classification Head};
+\draw[grp] (-6.8,-8.05) rectangle (6.8,-11.85);
+\node[grptitle,anchor=south east] at (6.8,-8.05) {Process 5: Feature Extraction \& Model Training};
+\draw[flow] (gt.south) -- (tok.north);
+\draw[flow] (tok) -- (bb);
+\draw[flow] (bb) -- (fuse);
+\draw[flow] (vit) -- (fuse);
+\draw[flow] (fuse) -- (cls);
+% image path (outside right)
+\draw[dflow] (img.east) -- (7.05,0) |- (vit.east);
+\node[lab,rotate=90,anchor=north] at (7.1,-5.5) {Image features};
+
+% ===== Processes 6 & 7
+\node[ext]  (uin)  at (-5.25,-14.4) {User Bangla Text / URL};
+\node[proc] (inf)  at (-1.75,-14.4) {Model Inference Engine};
+\node[proc] (pout) at ( 1.75,-13.5) {Propaganda Label \& Technique Identification};
+\node[proc] (shap) at ( 1.75,-15.3) {Feature Attribution \& Explainability Module};
+\node[proc] (disp) at ( 5.25,-14.4) {Web Results Dashboard};
+\draw[grp] (-6.8,-12.55) rectangle (6.8,-16.25);
+\node[grptitle,anchor=south east] at (6.8,-12.55) {Processes 6 \& 7: Prediction \& Explainability};
+\draw[flow] (uin) -- (inf);
+\draw[flow] (inf.east)  -- ++(0.43,0) |- (pout.west);
+\draw[flow] (inf.east)  -- ++(0.43,0) |- (shap.west);
+\draw[flow] (pout.east) -- ++(0.43,0) |- (disp.west);
+\draw[flow] (shap.east) -- ++(0.43,0) |- (disp.west);
+\draw[dflow] (cls.south) -- (inf.north);
+\node[lab,anchor=west] at (-1.6,-12.2) {Trained weights};
+\end{tikzpicture}
+\end{adjustbox}
+\caption{Detailed Level~2 Data Flow Diagram (DFD) for the proposed system.}
+\label{fig:dfd2}
+\end{figure}
+
+% ---------------------------------------------------------------------
+\subsection{UI Design}
+The proposed application uses a simple, intuitive interface so that users can
+easily submit Bangla content and understand the result.
+
+\subsubsection*{Main Screen}
+The main screen contains the application title (\textbf{Bangla Propaganda Detection
+System}), a short explanation of the system purpose, a Bangla text input area, an
+``Analyze'' button, and a result section.
+
+\begin{figure}[H]
+  \centering
+  \includegraphics[width=0.75\textwidth,height=12cm,keepaspectratio]{Chapter 3/UI design.png}
+  \caption{Main screen result interface.}
+  \label{fig:ui-main}
+\end{figure}
+
+\subsubsection*{Result Interface}
+The result page clearly separates the input, prediction, and explanation:
+\textbf{Prediction:} Propaganda Detected; \textbf{Possible Technique:} Loaded
+Language; \textbf{Confidence:} Medium; \textbf{Explanation:} the text contains
+emotionally strong wording that may influence the reader. The explanation is
+treated as supporting information rather than as a replacement for the
+classification result.
+
+\subsubsection*{Annotation Interface}
+A separate interface is used by the researcher or annotator to support the LLM
+pre-annotation $\rightarrow$ human verification workflow.
+
+\begin{figure}[H]
+  \centering
+  \includegraphics[width=0.75\textwidth,height=12cm,keepaspectratio]{Chapter 3/Annotation Interface.png}
+  \caption{Annotation interface.}
+  \label{fig:ui-annot}
+\end{figure}
+
+% ---------------------------------------------------------------------
+\section{Detailed Methodology and Design}
+\label{sec:detailed-method}
+This section explains how the proposed system will be developed and why the
+selected solutions are appropriate. Several alternative approaches were considered
+before selecting the proposed combination of existing datasets, human-verified
+custom data, transformer-based models, and LLM-assisted annotation.
+
+\subsection{Overall Design Approach}
+The project follows an iterative design rather than attempting to build the
+complete system in a single step:
+\[
+\begin{gathered}
+\text{Existing Dataset} \rightarrow \text{Baseline Pipeline} \rightarrow \text{Custom Dataset} \\
+\rightarrow \text{Annotation} \rightarrow \text{Model Training} \rightarrow \text{Evaluation} \rightarrow \text{Improvement}
+\end{gathered}
+\]
+This approach reduces development risk because the model-development pipeline can
+be tested before the custom dataset is complete.
+
+\subsection{Alternative Solutions Considered}
+
+\subsubsection{Alternative 1: Building a Large Dataset Completely From Scratch}
+One possible approach was to immediately collect and manually annotate a very large
+Bangla dataset (e.g., attempting to label 10,000--50,000 samples before beginning
+model development).
+\begin{itemize}
+  \item \textbf{Advantages:} Labels would be created specifically for the research
+        task; the dataset could be designed around the exact propaganda categories
+        required.
+  \item \textbf{Disadvantages:} Manual annotation would require a large amount of
+        time; annotation cost would increase significantly; difficult and
+        ambiguous examples would require additional review; model development
+        would need to wait until a large dataset was completed.
+  \item \textbf{Selected Approach:} The proposed research instead begins with
+        existing datasets and gradually creates a smaller custom dataset. This
+        allows the technical pipeline to be developed immediately and reduces the
+        initial annotation burden.
+\end{itemize}
+
+\subsubsection{Alternative 2: Fully Automatic LLM Annotation}
+Another possible solution was to ask an LLM to label all collected samples and
+directly use those labels as the dataset ground truth.
+\begin{itemize}
+  \item \textbf{Advantages:} Very fast compared with manual annotation; large
+        quantities of data can be labeled automatically; reduces human workload.
+  \item \textbf{Disadvantages:} LLM predictions can be incorrect; ambiguous Bangla
+        language may be interpreted incorrectly; the LLM may introduce systematic
+        labeling bias; using LLM labels as ground truth may reduce dataset
+        reliability.
+  \item \textbf{Selected Approach:} The proposed system uses the LLM only for
+        pre-annotation. Every final label must be checked by a human annotator.
+        Therefore
+        \[\text{LLM Suggestion}\neq\text{Ground Truth},\]
+        and the ground truth is the final human-verified label.
+\end{itemize}
+
+\subsubsection{Alternative 3: Complete Manual Annotation}
+A third approach is to manually annotate every collected sample without using an LLM.
+\begin{itemize}
+  \item \textbf{Advantages:} Direct human judgment; better control over the
+        annotation process; no dependence on LLM-generated suggestions.
+  \item \textbf{Disadvantages:} Very time-consuming; more expensive in terms of
+        researcher effort; difficult to scale as the dataset grows; annotators may
+        become tired, which can reduce consistency.
+  \item \textbf{Selected Approach:} The proposed LLM-assisted approach provides a
+        compromise. The LLM performs an initial classification, while humans make
+        the final decision. This reduces repetitive work without removing human
+        control.
+\end{itemize}
+
+\subsubsection{Alternative 4: Traditional Machine Learning}
+Traditional models such as SVM, Logistic Regression, or Naive Bayes could be used as
+the main final classifier.
+\begin{itemize}
+  \item \textbf{Advantages:} Simple to implement; fast to train; computationally
+        inexpensive; useful as baseline models.
+  \item \textbf{Disadvantages:} Usually require manually designed text features;
+        may have difficulty capturing complex contextual relationships in Bangla;
+        may perform poorly when propaganda depends on wider context.
+  \item \textbf{Selected Approach:} A traditional model is still implemented as a
+        baseline. However, the main experiments investigate transformer-based
+        models because they capture contextual language information more
+        effectively.
+\end{itemize}
+
+\subsubsection{Alternative 5: BanglaBERT vs.\ XLM-R}
+Two candidate transformer approaches are particularly relevant:
+\begin{itemize}
+  \item \textbf{BanglaBERT.} \emph{Advantages:} designed specifically for Bangla;
+        suitable for Bangla text classification; can provide strong
+        language-specific representations. \emph{Disadvantages:} primarily focused
+        on Bangla; may be less suitable if the project is later expanded to
+        multiple languages.
+  \item \textbf{XLM-R.} \emph{Advantages:} supports many languages; can support
+        multilingual expansion; useful if the system later needs to process both
+        Bangla and other languages. \emph{Disadvantages:} not designed only for
+        Bangla; a Bangla-specific model may be more suitable for some Bangla-only
+        tasks.
+  \item \textbf{Selected Approach:} BanglaBERT is used as the primary candidate and
+        XLM-R as a comparison model. This allows the research to determine whether
+        a Bangla-specific model or a multilingual model performs better on the
+        custom dataset instead of assuming the answer beforehand.
+\end{itemize}
+
+\subsubsection{Alternative 6: Text-Only vs.\ Multimodal Detection}
+A text-only system is simpler because it requires only Bangla text. However,
+propaganda can also appear through images, memes, and combinations of text and
+visual content. Existing research shows that multimodal information can contain
+useful detection signals.
+\begin{itemize}
+  \item \textbf{Text-Only Approach.} \emph{Advantages:} easier to implement;
+        requires fewer computational resources; easier dataset collection;
+        suitable for the initial prototype. \emph{Disadvantages:} cannot analyze
+        visual propaganda; may miss important information in images.
+  \item \textbf{Multimodal Approach.} \emph{Advantages:} uses both text and image
+        information; more suitable for posts containing memes or image-based
+        messages. \emph{Disadvantages:} more complex; requires image data and
+        suitable multimodal models; requires more computational resources;
+        annotation becomes more difficult.
+  \item \textbf{Selected Approach:} The initial system focuses on Bangla text
+        detection so that the core pipeline can be developed and evaluated
+        properly. Multimodal support is investigated as an extension where
+        suitable image--text data are available. This follows the project's
+        iterative strategy: first make the core system reliable, then increase its
+        complexity.
+\end{itemize}
+
+\subsection{Design Rationale and Trade-off Evaluation}
+Table~\ref{tab:tradeoff} consolidates the alternatives above into a single
+evaluation matrix, stating for each design layer what was considered and why the
+selected option was chosen.
+
+\begingroup
+\small
+\renewcommand{\arraystretch}{1.3}
+\begin{longtable}{@{}L{2.9cm}L{3.9cm}L{6.1cm}@{}}
+\caption{Design rationale and trade-off evaluation matrix.}\label{tab:tradeoff}\\
+\toprule
+\textbf{Design Layer} & \textbf{Considered Alternative} & \textbf{Selected Choice \& Engineering Rationale}\\
+\midrule
+\endfirsthead
+\multicolumn{3}{@{}l}{\small\itshape Table~\thetable\ (continued)}\\
+\toprule
+\textbf{Design Layer} & \textbf{Considered Alternative} & \textbf{Selected Choice \& Engineering Rationale}\\
+\midrule
+\endhead
+\bottomrule
+\endlastfoot
+
+\textbf{Dataset Creation Strategy} & Fully manual annotation from scratch (10,000+ samples). &
+\textbf{Hybrid LLM pre-annotation + human verification:} reduces manual annotator fatigue and labeling cost while preserving ground-truth fidelity through expert human sign-off~\cite{maarouf2024}.\\
+\addlinespace
+\textbf{Annotation Authority} & Fully autonomous LLM zero-shot labeling. &
+\textbf{Human-in-the-loop ground truth:} pure LLM labels can suffer from hallucination and cultural blindness in Bangla idioms; human verification protects label quality~\cite{hasan2026,maarouf2024}.\\
+\addlinespace
+\textbf{Core NLP Backbone} & Classical machine learning (TF-IDF + SVM / Naive Bayes). &
+\textbf{Fine-tuned pretrained transformers (BanglaBERT \& XLM-R):} capture bidirectional contextual semantics, sarcasm, and rhetorical nuance that $n$-gram models miss. Classical ML is retained strictly as the E1 baseline.\\
+\addlinespace
+\textbf{Monolingual vs.\ Multilingual} & Generic multilingual models only (mBERT / XLM-R). &
+\textbf{Dual evaluation (BanglaBERT vs.\ XLM-R):} BanglaBERT provides vocabulary specialization for Bengali script, while XLM-R tests cross-lingual robustness against code-mixed Bangla--English text.\\
+\addlinespace
+\textbf{Modality Scope} & Full multimodal (video + audio + text + network) from day one. &
+\textbf{Phased, extensible modular architecture:} Phase~1 establishes robust text detection and dataset verification; Phase~2 adds image--text meme fusion; Phase~3 integrates graph-based coordination metrics.\\
+\addlinespace
+\textbf{Class Imbalance Strategy} & Standard cross-entropy on the raw class distribution. &
+\textbf{Cost-sensitive loss weighting + strategic oversampling:} prevents bias toward the dominant ``No Propaganda'' class and supports viable recall on minority techniques (e.g., Bandwagon, Fear Appeal).\\
+\end{longtable}
+\endgroup
+
+\subsection{Dataset Design}
+The dataset design follows a three-stage methodology:
+\begin{itemize}
+  \item \textbf{Stage 1: Existing Dataset.} Existing publicly available Bangla
+        datasets are used to develop and test the initial pipeline.
+  \item \textbf{Stage 2: Custom Dataset.} Approximately 500--1,000 Bangla samples
+        will initially be collected from appropriate public sources.
+  \item \textbf{Stage 3: Dataset Improvement.} After model evaluation,
+        underrepresented classes will be identified and additional real examples
+        will be collected where necessary. Synthetic augmentation may be
+        investigated only when real examples remain insufficient, following the
+        workflow
+        \[\text{Generate}\rightarrow\text{Filter}\rightarrow\text{Human Check}\rightarrow\text{Training Use}.\]
+        Synthetic examples will be stored separately from real-world examples
+        during evaluation.
+\end{itemize}
+
+\subsection{Annotation Design}
+The annotation system is based on a two-level process:
+\begin{itemize}
+  \item \textbf{Level 1: LLM Pre-Annotation.} The LLM receives a Bangla sample and
+        suggests whether propaganda may be present, the possible propaganda
+        technique, confidence or certainty, and a short explanation.
+  \item \textbf{Level 2: Human Verification.} The human annotator checks the
+        prediction and assigns the final label.
+\end{itemize}
+The final dataset therefore contains
+\[\text{Original Text}+\text{LLM Suggestion}+\text{Human Decision}+\text{Final Label}.\]
+This information can also help researchers analyze where the LLM performs well or
+poorly.
+
+\subsection{Class Imbalance Design}
+The dataset may contain significantly different numbers of examples for different
+propaganda categories. For example: \emph{No Propaganda}: 700; \emph{Loaded
+Language}: 100; \emph{Fear Appeal}: 40; \emph{Bandwagon}: 20; \emph{Other}: 10.
+The project will monitor class distributions after each data-collection cycle.
+Possible solutions include:
+\begin{enumerate}
+  \item \textbf{Additional real-data collection:} more minority-class examples will
+        be collected where possible.
+  \item \textbf{Class weighting:} the training algorithm may assign greater
+        importance to minority classes.
+  \item \textbf{Oversampling:} minority examples may be sampled more frequently
+        during training.
+  \item \textbf{Synthetic augmentation:} LLM-generated examples may be investigated
+        after human filtering.
+\end{enumerate}
+The chosen technique will be determined experimentally rather than assumed to be
+effective in advance.
+
+\subsection{Training and Testing Design}
+\begin{itemize}
+  \item The human-verified dataset will be divided into \textbf{training},
+        \textbf{validation}, and \textbf{test} subsets.
+  \item The training set will be used for model learning.
+  \item The validation set will be used for model selection and parameter tuning.
+  \item The test set will be kept separate and used for final evaluation.
+  \item The test data must not be used during training or annotation decisions in a
+        way that causes data leakage.
+\end{itemize}
+
+\subsection{Experimental Design}
+The project will compare multiple approaches rather than reporting only one model.
+The experimental structure is shown in Table~\ref{tab:experiments}.
+
+\begin{table}[H]
+\centering
+\caption{Experimental design.}\label{tab:experiments}
+\renewcommand{\arraystretch}{1.25}
+\begin{tabular}{@{}cl@{}}
+\toprule
+\textbf{Experiment} & \textbf{Approach}\\
+\midrule
+E1 & Traditional ML baseline\\
+E2 & BanglaBERT\\
+E3 & XLM-R\\
+E4 & BanglaBERT + class-imbalance strategy\\
+E5 & XLM-R + class-imbalance strategy\\
+E6 & Optional LLM-assisted / synthetic augmentation experiment\\
+\bottomrule
+\end{tabular}
+\end{table}
+The final selection will be based on measured performance rather than assuming that
+the most complex model will perform best.
+
+\subsection{Evaluation Design}
+The main performance measures will be:
+\begin{itemize}
+  \item \textbf{Accuracy:} overall proportion of correctly classified examples.
+  \item \textbf{Precision:} how many predicted positive examples are actually positive.
+  \item \textbf{Recall:} how many actual positive examples are correctly detected.
+  \item \textbf{F1-score:} the harmonic mean of precision and recall.
+\end{itemize}
+For an imbalanced multi-class dataset, \textbf{macro-F1} and \textbf{class-wise
+F1-score} will receive particular attention because they provide a clearer view of
+minority-class performance. A confusion matrix will also be used to identify which
+propaganda categories are commonly confused with one another.
+
+\subsection{Error Analysis}
+After evaluation, incorrectly classified examples will be manually inspected. The
+researchers will investigate whether errors are caused by ambiguous language,
+sarcasm, insufficient training examples, class imbalance, cultural context,
+code-mixing, similar propaganda categories, or limitations of the selected model.
+The error analysis will guide the next iteration of dataset collection and model
+training.
+
+\subsection{Final System Architecture}
+The final proposed architecture is divided into two connected parts: a research
+pipeline responsible for building and improving the model, and a user application
+that uses the trained model to provide predictions (Figure~\ref{fig:arch}).
+
+\begin{figure}[H]
+\centering
+\begin{adjustbox}{max width=\textwidth}
+\begin{tikzpicture}
+% ===== Research pipeline
+\node[blk]   (ds)  at (-5.1, 0.0) {Data Sources};
+\node[blk]   (dc)  at (-1.7, 0.0) {Data Collection};
+\node[blk]   (dp)  at ( 1.7, 0.0) {Pre-processing};
+\node[blk]   (lpa) at ( 5.1, 0.0) {LLM Pre-Annotation};
+\node[blk]   (hv)  at ( 5.1,-1.9) {Human Verification};
+\node[store] (vd)  at ( 1.7,-1.9) {Verified Dataset};
+\node[blk]   (mt)  at (-1.7,-1.9) {Model Training};
+\node[blk]   (ev)  at (-1.7,-3.8) {Evaluation};
+\node[blk]   (mi)  at (-5.1,-3.8) {Model Improvement};
+\draw[grp] (-6.8,0.95) rectangle (6.8,-4.75);
+\node[grptitle,anchor=south west] at (-6.8,0.95) {Research Pipeline};
+\draw[flow] (ds) -- (dc);  \draw[flow] (dc) -- (dp);  \draw[flow] (dp) -- (lpa);
+\draw[flow] (lpa) -- (hv); \draw[flow] (hv) -- (vd);  \draw[flow] (vd) -- (mt);
+\draw[flow] (mt) -- (ev);  \draw[flow] (ev) -- (mi);
+\draw[dflow] (mi.north) -- (-5.1,-0.95) -| (dc.south);
+\node[lab,anchor=west] at (-5.0,-2.3) {iterate};
+
+% ===== User application
+\node[ext]  (u)   at ( 5.1,-7.5) {User};
+\node[blk]  (bti) at ( 1.7,-7.5) {Bangla Text Input};
+\node[blk]  (up)  at (-1.7,-7.5) {Pre-processing};
+\node[proc] (tpm) at (-5.1,-7.5) {Trained Propaganda Model};
+\node[blk]  (pr)  at (-5.1,-9.4) {Prediction};
+\node[blk]  (tce) at (-1.7,-9.4) {Technique / Confidence / Explanation};
+\node[blk]  (res) at ( 1.7,-9.4) {User Result Display};
+\draw[grp] (-6.8,-6.55) rectangle (6.8,-10.35);
+\node[grptitle,anchor=south east] at (6.8,-6.55) {User Application};
+\draw[flow] (u) -- (bti);  \draw[flow] (bti) -- (up);  \draw[flow] (up) -- (tpm);
+\draw[flow] (tpm) -- (pr); \draw[flow] (pr) -- (tce);  \draw[flow] (tce) -- (res);
+
+% deploy link
+\draw[dflow] (ev.south) -- (-1.7,-5.6) -| (tpm.north);
+\node[lab,above] at (-3.4,-5.6) {deploy model};
+\end{tikzpicture}
+\end{adjustbox}
+\caption{Final system architecture: research pipeline and user application.}
+\label{fig:arch}
+\end{figure}
+
+\subsection{Why the Proposed Design Was Selected}
+The proposed design was selected because it balances research reliability,
+development effort, scalability, and practicality. Using existing datasets allows
+the technical pipeline to be developed early. Creating a smaller custom dataset
+makes it possible to focus annotation effort on data specifically relevant to
+Bangla propaganda detection. Using an LLM for pre-annotation reduces repetitive
+work, while human verification protects the quality of the ground-truth labels.
+
+Similarly, using traditional machine learning as a baseline and transformer models
+as the main candidates allows meaningful comparison between simple and advanced
+approaches. Starting with text-based detection keeps the initial implementation
+manageable, while the architecture leaves room for future multimodal expansion.
+The overall design is therefore iterative:
+\[\text{Build}\rightarrow\text{Test}\rightarrow\text{Analyze}\rightarrow\text{Improve}\rightarrow\text{Retrain}\rightarrow\text{Re-evaluate}.\]
+This makes it possible to improve both the dataset and the model throughout the
+project instead of expecting the first version to be perfect.
+
+% ---------------------------------------------------------------------
+\section{Project Plan}
+\label{sec:plan}
+The project lifecycle is planned across three consecutive academic trimesters
+(25 weeks), structured into four distinct engineering phases. The schedule is shown
+as a Gantt chart in Figure~\ref{fig:gantt}.
+
+\begin{figure}[H]
+\centering
+\begin{adjustbox}{max width=\textwidth}
+\begin{ganttchart}[
+    hgrid, vgrid={*{4}{draw=none},dotted},
+    x unit=0.42cm, y unit chart=0.6cm, y unit title=0.55cm,
+    title height=1, title label font=\tiny\bfseries,
+    bar height=0.55, bar label font=\scriptsize,
+    group label font=\scriptsize\bfseries,
+    bar/.append style={fill=uiublue!70,draw=uiublue},
+    group/.append style={fill=uiublue!35,draw=uiublue},
+    bar label node/.append style={text width=5.8cm,align=right,anchor=east,font=\scriptsize\RaggedLeft},
+    group label node/.append style={text width=5.8cm,align=right,anchor=east,font=\scriptsize\bfseries\RaggedLeft}
+  ]{1}{25}
+  \gantttitle{Weeks 1--25}{25}\\
+  \gantttitlelist{1,...,25}{1}\\
+  \ganttgroup{Phase 1: Planning}{1}{8}\\
+  \ganttbar{Literature Review \& Taxonomy}{1}{8}\\
+  \ganttbar{Requirements \& Architecture Spec.}{3}{8}\\
+  \ganttgroup{Phase 2: Data Pipeline}{5}{16}\\
+  \ganttbar{Web Scraping \& Data Ingestion}{5}{14}\\
+  \ganttbar{LLM Pre-Annotation Prompting}{7}{12}\\
+  \ganttbar{Human Expert Annotation \& Verification}{9}{16}\\
+  \ganttgroup{Phase 3: Modeling \& Evaluation}{15}{22}\\
+  \ganttbar{Classical Baselines (SVM/NB)}{15}{18}\\
+  \ganttbar{BanglaBERT \& XLM-R Fine-Tuning}{16}{21}\\
+  \ganttbar{Class Imbalance Mitigation \& Testing}{18}{22}\\
+  \ganttgroup{Phase 4: UI \& Deployment}{20}{25}\\
+  \ganttbar{Explainability Module \& UI Dashboard}{20}{24}\\
+  \ganttbar{Benchmarking \& Final Thesis Draft}{22}{25}
+\end{ganttchart}
+\end{adjustbox}
+\caption{Gantt chart of the project execution lifecycle (Weeks 1--25).}
+\label{fig:gantt}
+\end{figure}
+
+\begin{itemize}
+  \item \textbf{Phase 1: Requirements Gathering \& Taxonomy Definition (Weeks
+        1--8).} Systematic review of propaganda literature, defining the Bangla
+        propaganda technique taxonomy, and architecting the DFD.
+  \item \textbf{Phase 2: Data Curation \& Hybrid Annotation (Weeks 5--16).}
+        Gathering raw posts, prompt engineering for LLM pre-annotation, and
+        conducting human expert verification to construct the verified dataset.
+  \item \textbf{Phase 3: Model Training \& Experimental Benchmarking (Weeks
+        15--22).} Fine-tuning BanglaBERT and XLM-R, implementing cost-sensitive
+        loss weighting, and conducting ablation experiments E1--E6.
+  \item \textbf{Phase 4: Dashboard Integration \& Final Thesis (Weeks 20--25).}
+        Integrating the prediction engine with the web user interface, generating
+        explainability summaries, and writing the final thesis report.
+\end{itemize}
+
+\section{Task Allocation}
+\label{sec:tasks}
+Project responsibilities are divided among team members according to technical
+sub-disciplines:
+\begin{itemize}
+  \item \textbf{Shekh Abdullah Al Mehedi (ID: 112231075):} data pipeline
+        architecture, automated web scraping infrastructure, data
+        cleaning/normalization, and database management.
+  \item \textbf{Mahjabin Khan (ID: 112230177):} annotation pipeline design, LLM
+        prompt engineering for pre-annotation, annotator guideline drafting, and
+        human verification coordination.
+  \item \textbf{Omor Faruck Ullas (ID: 112310384):} machine learning pipeline,
+        transformer model fine-tuning (BanglaBERT \& XLM-R), class imbalance
+        mitigation, and loss function engineering.
+  \item \textbf{Md.\ Rayan Rahman (ID: 112331071):} system evaluation, benchmarking
+        experiments (E1--E6), confusion matrix error analysis, and web UI/API
+        development.
+\end{itemize}
+
+% =====================================================================
+%                            CHAPTER 4
+% =====================================================================

@@ -1,0 +1,313 @@
+\documentclass[12pt,a4paper]{report}
+
+% -------------------------------------------------
+% Packages
+% -------------------------------------------------
+
+\usepackage[a4paper,margin=1in,headheight=15pt]{geometry}
+\usepackage{graphicx}
+\usepackage{float}
+\usepackage{amsmath}
+\usepackage{amssymb}
+\usepackage{booktabs}
+\usepackage{longtable}
+\usepackage{array}
+\usepackage{tabularx}
+\usepackage{multirow}
+\usepackage{makecell}
+\usepackage{ragged2e}
+\usepackage{url}
+\usepackage{cite}
+\usepackage{setspace}
+\usepackage{titlesec}
+\usepackage[hidelinks,bookmarks=true]{hyperref}
+\usepackage{fancyhdr}
+\usepackage{enumitem}
+\usepackage{caption}
+\usepackage{xcolor}
+\usepackage{adjustbox}
+
+% -------------------------------------------------
+% TikZ (used only for figures that have no PNG)
+% -------------------------------------------------
+
+\usepackage{tikz}
+\usetikzlibrary{arrows.meta,positioning,fit,backgrounds,calc}
+\usepackage{pgfgantt}
+
+% -------------------------------------------------
+% Colours and TikZ styles
+% -------------------------------------------------
+
+\definecolor{uiublue}{RGB}{0,51,102}
+\definecolor{boxfill}{RGB}{232,240,250}
+\definecolor{boxdraw}{RGB}{0,51,102}
+\definecolor{storefill}{RGB}{255,244,214}
+\definecolor{procfill}{RGB}{225,242,232}
+\definecolor{extfill}{RGB}{244,228,228}
+
+\tikzset{
+  >=Stealth,
+  ext/.style   ={rectangle,draw=boxdraw,fill=extfill,rounded corners=2pt,
+                 minimum height=12mm,text width=24mm,inner sep=3pt,align=center,font=\scriptsize},
+  proc/.style  ={rectangle,draw=boxdraw,fill=procfill,rounded corners=3pt,
+                 minimum height=12mm,text width=24mm,inner sep=3pt,align=center,font=\scriptsize},
+  blk/.style   ={rectangle,draw=boxdraw,fill=boxfill,rounded corners=3pt,
+                 minimum height=12mm,text width=24mm,inner sep=3pt,align=center,font=\scriptsize},
+  store/.style ={rectangle,draw=boxdraw,fill=storefill,
+                 minimum height=12mm,text width=24mm,inner sep=3pt,align=center,font=\scriptsize},
+  flow/.style  ={->,thick,draw=boxdraw!80!black},
+  dflow/.style ={->,thick,dashed,draw=boxdraw!80!black},
+  line/.style  ={thick,draw=boxdraw!80!black},
+  lab/.style   ={font=\scriptsize,inner sep=1.5pt,align=center,text=black},
+  grp/.style   ={draw=boxdraw!60,dashed,thick,rounded corners=4pt},
+  grptitle/.style={font=\scriptsize\bfseries,text=boxdraw,inner sep=2pt}
+}
+
+% -------------------------------------------------
+% Layout
+% -------------------------------------------------
+
+\onehalfspacing
+\setlist{itemsep=2pt,topsep=4pt}
+\captionsetup{font=small,labelfont=bf,skip=6pt}
+
+% -------------------------------------------------
+% Names
+% -------------------------------------------------
+
+\renewcommand{\contentsname}{Table of Contents}
+\renewcommand{\listfigurename}{List of Figures}
+\renewcommand{\listtablename}{List of Tables}
+\renewcommand{\bibname}{References}
+
+% -------------------------------------------------
+% Header and Footer
+% -------------------------------------------------
+
+\pagestyle{fancy}
+\fancyhf{}
+
+\fancyhead[L]{\nouppercase{\rightmark}}
+\fancyhead[R]{\nouppercase{\leftmark}}
+
+\fancyfoot[C]{\thepage}
+
+\renewcommand{\headrulewidth}{0.4pt}
+\renewcommand{\footrulewidth}{0pt}
+
+\renewcommand{\chaptermark}[1]{%
+    \markboth{Chapter \thechapter.\ #1}{}%
+}
+
+\renewcommand{\sectionmark}[1]{%
+    \markright{\thesection.\ #1}%
+}
+
+\fancypagestyle{plain}{%
+    \fancyhf{}
+    \fancyfoot[C]{\thepage}
+    \renewcommand{\headrulewidth}{0pt}
+}
+
+% -------------------------------------------------
+% Chapter / section styling
+% -------------------------------------------------
+
+\titleformat{\chapter}[display]
+  {\normalfont\huge\bfseries\color{uiublue}}
+  {\chaptertitlename\ \thechapter}{14pt}{\Huge}
+\titlespacing*{\chapter}{0pt}{-20pt}{24pt}
+\titleformat{\section}{\normalfont\Large\bfseries\color{uiublue}}{\thesection}{0.8em}{}
+\titleformat{\subsection}{\normalfont\large\bfseries}{\thesubsection}{0.8em}{}
+\titleformat{\subsubsection}{\normalfont\normalsize\bfseries\itshape}{\thesubsubsection}{0.8em}{}
+
+% -------------------------------------------------
+% Convenience macros
+% -------------------------------------------------
+
+\newcommand{\ck}{$\checkmark$}
+\newcommand{\ttl}{A Multimodal AI Framework for Detecting Coordinated Propaganda in Bangla Online Media Content}
+
+\hypersetup{pdftitle={\ttl},pdfauthor={Group 262-037, UIU}}
+
+% -------------------------------------------------
+% Report chapter selection
+% -------------------------------------------------
+% 0 = Full Report
+% 1 = Chapter 1 only ... 5 = Chapter 5 only
+
+\def\reportselect{0}
+
+\newcommand{\includechapter}[2]{%
+    \ifnum\reportselect=0
+        \setcounter{chapter}{\numexpr#1-1\relax}%
+        \input{#2}%
+    \else
+        \ifnum\reportselect=#1
+            \setcounter{chapter}{\numexpr#1-1\relax}%
+            \input{#2}%
+        \fi
+    \fi
+}
+
+% =================================================
+% Document
+% =================================================
+
+\begin{document}
+
+% =================================================
+% Title Page
+% =================================================
+
+\begin{titlepage}
+
+\begin{center}
+
+\noindent\rule{\textwidth}{1pt}
+
+\vspace{0.8cm}
+
+{\LARGE\bfseries
+A Multimodal AI Framework\\[0.35em]
+for Detecting Coordinated Propaganda\\[0.35em]
+in Bangla Online Media Content\\[0.35em]
+}
+
+\vspace{0.8cm}
+
+\noindent\rule{\textwidth}{1pt}
+
+\end{center}
+
+\vfill
+
+\begin{center}
+By
+\end{center}
+
+\vfill
+
+\begin{center}
+
+\begin{tabular}{l l}
+Shekh Abdullah Al Mehedi & ID: 112231075 \\
+Mahjabin Khan            & ID: 112230177 \\
+Omor Faruck Ullas        & ID: 112310384 \\
+Md. Rayan Rahman         & ID: 112331071
+\end{tabular}
+
+\end{center}
+
+\vfill
+
+\begin{center}
+{\large\bfseries
+Supervisor: Dr.\ Jannatun Noor Mukta\\[0.3em]
+Group: 262-037
+}
+\end{center}
+
+\vfill
+
+\begin{center}
+Submitted in partial fulfilment of the requirements\\
+of the degree of Bachelor of Science in Computer Science and Engineering
+\end{center}
+
+\vfill
+
+\begin{center}
+September 2026
+\end{center}
+
+\vfill
+
+\begin{center}
+\includegraphics[scale=0.15]{uiu.png}
+\end{center}
+
+\begin{center}
+\textsc{
+Department of Computer Science and Engineering\\
+United International University
+}
+\end{center}
+
+\end{titlepage}
+
+
+% =================================================
+% Preliminary Pages
+% =================================================
+
+\pagenumbering{roman}
+
+
+% -------------------------------------------------
+% Table of Contents
+% -------------------------------------------------
+
+\addcontentsline{toc}{chapter}{Table of Contents}
+\tableofcontents
+\clearpage
+
+
+% =================================================
+% List of Figures
+% =================================================
+
+\addcontentsline{toc}{chapter}{List of Figures}
+\listoffigures
+\clearpage
+
+
+% =================================================
+% List of Tables
+% =================================================
+
+\addcontentsline{toc}{chapter}{List of Tables}
+\listoftables
+\clearpage
+
+
+% =================================================
+% Main Content
+% =================================================
+
+\pagenumbering{arabic}
+\setcounter{page}{1}
+
+
+% -------------------------------------------------
+% Chapters
+% -------------------------------------------------
+
+\includechapter{1}{Chapter 1/chapter1}
+
+\includechapter{2}{Chapter 2/chapter2}
+
+\includechapter{3}{Chapter 3/chapter3}
+
+% Chapter 4 (Implementation and Results) -- enable when ready:
+% \includechapter{4}{Chapter 4/chapter4}
+
+\includechapter{5}{Chapter 5/chapter5}
+
+% Chapter 6 (Conclusion, Limitations & Future Work) -- enable when ready:
+% \includechapter{6}{Chapter 6/chapter6}
+
+
+% =================================================
+% References
+% =================================================
+
+\clearpage
+
+\addcontentsline{toc}{chapter}{References}
+
+\bibliographystyle{IEEEtran}
+\bibliography{references}
+
+\end{document}

@@ -1,0 +1,247 @@
+\chapter{Standards and Design Constraints}
+\label{ch:standards}
+
+This chapter details the engineering standards, real-world design constraints,
+financial budget analysis, and formal mapping to Washington Accord / BAETE Complex
+Engineering Problem Solving criteria guiding the development of the Bangla
+propaganda detection framework.
+
+\section{Compliance with Standards}
+To ensure reproducibility, maintainability, and interoperability, the project
+adheres to established technical standards.
+
+\subsection{Software Standards}
+\begin{itemize}
+  \item Adherence to \textbf{PEP~8} style guidelines for all Python modules.
+  \item Utilization of standardized machine learning frameworks (\textbf{PyTorch},
+        \textbf{Hugging Face Transformers}) to ensure cross-platform
+        reproducibility.
+  \item Implementation of \textbf{RESTful API} conventions using FastAPI/Flask and
+        \textbf{JSON Schema} for structured data exchange.
+\end{itemize}
+
+\subsection{Hardware and Cloud Standards}
+\begin{itemize}
+  \item Compliance with standard GPU computing interfaces (CUDA~12.x, OpenCL) to
+        allow portable training across both local workstations and cloud
+        infrastructure.
+\end{itemize}
+
+\subsection{Communication and Security Standards}
+\begin{itemize}
+  \item Enforcing \textbf{HTTPS (TLS~1.3)} encryption for all web interface
+        interactions and API queries.
+  \item Adoption of the \textbf{Schema.org ClaimReview} structured data standard to
+        ensure interoperability with international fact-checking
+        platforms~\cite{google_claimreview}.
+\end{itemize}
+
+\section{Realistic Design Constraints}
+
+\subsection{Economic Constraint}
+Academic and independent journalistic organizations in Bangladesh operate under
+strict financial limits. The framework avoids dependence on proprietary per-token
+cloud APIs (e.g., proprietary LLM inference) for runtime detection. Instead, the
+final model is fine-tuned into open-weight transformer backbones (BanglaBERT)
+capable of low-cost local or edge deployment.
+
+\subsection{Environmental Constraint}
+Training large generative architectures from scratch consumes enormous electrical
+power. We constrain our carbon footprint by utilizing transfer learning ---
+fine-tuning existing open-source pretrained representations rather than training
+models from scratch.
+
+\subsection{Ethical Constraint}
+Detecting political propaganda carries significant ethical risks regarding
+censorship, freedom of speech, and algorithmic political bias. To uphold ethical
+standards:
+\begin{itemize}
+  \item The system outputs probability confidence scores and explainable rationale
+        rather than absolute binary judgments.
+  \item Training data is balanced across diverse political viewpoints to prevent
+        partisan favoritism.
+  \item Public data collection strictly complies with platform Terms of Service,
+        and personal identifiers are anonymized.
+\end{itemize}
+
+\subsection{Health and Safety Constraint}
+While software does not cause direct physical harm, coordinated disinformation in
+Bangladesh has repeatedly triggered real-world communal violence and riots.
+Erroneous detection could amplify panic or silence legitimate reporting. The system
+incorporates human-in-the-loop review safeguards before high-consequence moderation
+flags are triggered.
+
+\subsection{Social Constraint}
+The tool is designed to empower citizens, journalists, and researchers to think
+independently rather than having their views manipulated by coordinated actors. The
+user interface is crafted in clear, accessible Bangla to serve users across varying
+levels of technical literacy.
+
+\subsection{Political Constraint}
+The project operates strictly within the legal bounds of Bangladesh's Cyber Security
+Act and digital data protection policies, maintaining neutrality and strictly
+avoiding algorithmic political profiling.
+
+\subsection{Sustainability}
+The framework relies exclusively on open-source libraries and open-weight models,
+ensuring that the software can be maintained, adapted, and extended by the research
+community without ongoing commercial licensing fees.
+
+\section{Cost Analysis}
+
+\subsection{Proposed Budget}
+The proposed budget accounts for dedicated computational resources, data storage,
+and verification honorariums (Table~\ref{tab:budget1}).
+
+\begin{table}[H]
+\centering
+\caption{Proposed budget for the Bangla propaganda detection project.}\label{tab:budget1}
+\renewcommand{\arraystretch}{1.3}
+\begin{tabularx}{\textwidth}{@{}L{3.6cm}X r@{}}
+\toprule
+\textbf{Category} & \textbf{Description} & \textbf{Est.\ Cost (BDT)}\\
+\midrule
+Computational Resources & Dedicated GPU workstation time, RAM, and cloud compute subscriptions for transformer training & 1,80,000\\
+Data Collection \& Storage & Cloud database storage for the multimodal social media corpus and automated scraper hosting & 45,000\\
+Annotation \& Expert Verification & Honorarium for domain experts and linguists conducting ground-truth label verification & 60,000\\
+Miscellaneous \& Contingency & High-speed broadband data packages and unexpected contingency expenses & 5,000\\
+\midrule
+\multicolumn{2}{@{}l}{\textbf{Total}} & \textbf{2,90,000}\\
+\bottomrule
+\end{tabularx}
+\end{table}
+
+\subsection{Alternate Budget and Rationale}
+To accommodate severe financial constraints, an alternate low-cost budget leveraging
+free academic resources is established (Table~\ref{tab:budget2}).
+
+\begin{table}[H]
+\centering
+\caption{Alternate low-cost budget.}\label{tab:budget2}
+\renewcommand{\arraystretch}{1.3}
+\begin{tabularx}{\textwidth}{@{}L{3.6cm}X r@{}}
+\toprule
+\textbf{Category} & \textbf{Description} & \textbf{Est.\ Cost (BDT)}\\
+\midrule
+Computational Resources & Free-tier Google Colab (T4 GPUs) and UIU Department computer-lab workstations & 0\\
+Data Collection \& Storage & Local workstation hard-drive storage and university Google Drive allocation & 0\\
+Annotation \& Verification & Internal student-team manual verification under faculty supervision & 0\\
+Miscellaneous & Contingency buffer & 2,500\\
+\midrule
+\multicolumn{2}{@{}l}{\textbf{Total}} & \textbf{2,500}\\
+\bottomrule
+\end{tabularx}
+\end{table}
+
+\textbf{Rationale.} While the alternate budget incurs near-zero financial cost, the
+Proposed Budget (Table~\ref{tab:budget1}) is strongly preferred. Training deep
+transformer networks on free Colab instances suffers from frequent kernel
+disconnects, timeouts, and limited GPU memory. Dedicated resources guarantee
+reliable experimental reproducibility.
+
+\subsection{Sustainability and Post-FYDP Revenue Model}
+To sustain the platform after project completion:
+\begin{enumerate}
+  \item \textbf{Open-Source Core:} the trained model weights and benchmark dataset
+        are freely released to the academic community.
+  \item \textbf{B2B / API Licensing for Newsrooms:} offering an automated
+        verification API to independent digital newsrooms and fact-checking
+        organizations in Bangladesh under a software-as-a-service (SaaS)
+        subscription model.
+  \item \textbf{Grant Funding:} seeking research grants from organizations focused
+        on digital literacy, counter-disinformation, and low-resource NLP.
+\end{enumerate}
+
+\section{Complex Engineering Problem (BAETE / Washington Accord)}
+
+\subsection{Complex Problem Solving Mapping}
+The project is mapped against the Washington Accord complex engineering problem
+criteria (P1--P7) in Table~\ref{tab:p1p7}.
+
+\begin{table}[H]
+\centering
+\caption{Mapping with complex problem solving criteria (P1--P7).}\label{tab:p1p7}
+\renewcommand{\arraystretch}{1.5}
+\resizebox{\textwidth}{!}{%
+\begin{tabular}{@{}c|c|c|c|c|c|c|c@{}}
+\toprule
+\textbf{Attribute} & \makecell{\textbf{P1}\\Depth of\\Knowledge} & \makecell{\textbf{P2}\\Conflicting\\Requirements} & \makecell{\textbf{P3}\\Depth of\\Analysis} & \makecell{\textbf{P4}\\Familiarity\\of Issues} & \makecell{\textbf{P5}\\Applicable\\Codes} & \makecell{\textbf{P6}\\Stakeholder\\Involvement} & \makecell{\textbf{P7}\\Inter-\\dependence}\\
+\midrule
+\textbf{Status} & \ck & \ck & \ck & \ck & \ck & \ck & \ck\\
+\bottomrule
+\end{tabular}}
+\end{table}
+
+\begin{itemize}
+  \item \textbf{P1: Depth of Knowledge Required.} Synthesizes Natural Language
+        Processing (transformers, attention mechanisms), multimodal computer vision
+        (ViT, ResNet), graph theory (coordinated social networks), and linguistic
+        rhetoric. Aligns with \textbf{WK3} (advanced engineering knowledge) and
+        \textbf{WK4} (specialist AI/ML architecture knowledge).
+  \item \textbf{P2: Range of Conflicting Requirements.} Balancing deep contextual
+        accuracy with computational inference latency; balancing aggressive
+        propaganda detection with the protection of free speech and political
+        satire.
+  \item \textbf{P3: Depth of Analysis Required.} In-depth modeling of subtle
+        rhetorical propaganda techniques (loaded language, fear appeals,
+        bandwagon) in morphologically rich, code-mixed Bangla text.
+  \item \textbf{P4: Familiarity of Issues.} Detecting coordinated propaganda
+        campaigns in under-resourced Bangla digital media is largely uncharted
+        territory compared to standard English fake-news benchmarks.
+  \item \textbf{P5: Extent of Applicable Codes.} Strict adherence to data privacy,
+        digital copyright, platform terms of service, and ethical AI fairness
+        standards.
+  \item \textbf{P6: Extent of Stakeholder Involvement.} Involves diverse
+        stakeholders including digital media consumers, journalists, academic
+        researchers, and content moderators.
+  \item \textbf{P7: Inter-dependence.} High inter-dependence across web scraping,
+        preprocessing, hybrid annotation, transformer fine-tuning, and user result
+        generation; an error or bias in annotation ripples through the entire
+        classification pipeline.
+\end{itemize}
+
+\subsection{Complex Engineering Activities Mapping}
+The project is mapped against the complex engineering activity attributes
+(A1--A5) in Table~\ref{tab:a1a5}.
+
+\begin{table}[H]
+\centering
+\caption{Mapping with complex engineering activities (A1--A5).}\label{tab:a1a5}
+\renewcommand{\arraystretch}{1.5}
+\begin{tabular}{@{}c|c|c|c|c|c@{}}
+\toprule
+\textbf{Attribute} & \makecell{\textbf{A1}\\Range of\\Resources} & \makecell{\textbf{A2}\\Level of\\Interaction} & \makecell{\textbf{A3}\\Innovation} & \makecell{\textbf{A4}\\Consequences\\for Society} & \makecell{\textbf{A5}\\Familiarity}\\
+\midrule
+\textbf{Status} & \ck & \ck & \ck & \ck & \ck\\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\begin{itemize}
+  \item \textbf{A1: Range of Resources.} GPU clusters, cloud storage, large-scale
+        web scrapers, transformer toolkits, and human expert linguistic annotators.
+  \item \textbf{A2: Level of Interaction.} Continuous synergy between computational
+        NLP subsystems and human domain experts during the two-tier verification
+        workflow.
+  \item \textbf{A3: Innovation.} Novel hybrid LLM--human annotation paradigm and
+        multi-faceted coordinated campaign detection framework tailored
+        specifically to Bangla online media.
+  \item \textbf{A4: Consequences for Society and Environment.} Substantial societal
+        impact in safeguarding civic discourse and countering dangerous communal
+        manipulation in Bangladesh.
+  \item \textbf{A5: Familiarity.} Requires innovative adaptation of cross-lingual
+        transfer learning to overcome the severe data scarcity characteristic of
+        low-resource Bangla NLP.
+\end{itemize}
+
+\section{Summary}
+This chapter formalized the engineering standards, realistic constraints, economic
+feasibility budgets, and rigorous BAETE accreditation mappings that validate this
+research as a comprehensive complex engineering capstone project.
+
+% =====================================================================
+%                            BIBLIOGRAPHY
+% =====================================================================
+\clearpage
+\phantomsection
+\addcontentsline{toc}{chapter}{Bibliography}

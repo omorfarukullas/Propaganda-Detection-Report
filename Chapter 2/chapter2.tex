@@ -1,0 +1,366 @@
+\chapter{Background}
+\label{ch:background}
+
+This chapter provides the background knowledge needed to understand the proposed
+work and discusses existing applications and research related to propaganda,
+misinformation, and harmful-content detection. It also identifies the main research
+gaps that motivate the proposed system.
+
+\section{Preliminaries}
+Social media has become an important platform for sharing news, opinions, images,
+and other information. At the same time, it can also be used to spread propaganda,
+misinformation, hate speech, manipulation, and other harmful content. Because
+harmful information can spread very quickly, automatic detection systems are
+becoming increasingly important.
+
+\subsection{Propaganda}
+Propaganda is information designed to influence people's opinions or behavior, often
+by using selective information, emotional language, misleading presentation, or
+other persuasive techniques. In social media, propaganda can appear as text,
+images, videos, hashtags, or coordinated posts.
+
+\subsection{Misinformation and Harmful Content}
+Misinformation refers to incorrect or misleading information. Harmful online
+content is a broader term that can include hate speech, offensive language,
+harassment, manipulated information, and other content that may cause social harm.
+These types of content can be difficult to detect automatically because their
+meaning often depends on context.
+
+\subsection{Machine Learning for Content Detection}
+Machine learning (ML) allows a computer system to learn patterns from previously
+labeled examples. Traditional ML methods such as Support Vector Machines (SVM) have
+been widely used for text classification. More recent systems use deep learning and
+transformer-based language models to understand more complex language
+patterns~\cite{duridi2025,plikynas2025}.
+
+\subsection{Deep Learning and Transformer Models}
+Deep learning (DL) models can automatically learn useful features from data.
+Transformer-based models are particularly useful for language tasks because they
+can capture relationships between words over a long text. Models such as BERT and
+language models adapted to specific languages have therefore become common in
+harmful-content detection~\cite{duridi2025,lora2023,hasan2026}.
+
+\subsection{Graph-Based Detection}
+Graph-based approaches represent information as connected nodes and relationships.
+They are useful when the relationship between words, users, posts, or accounts is
+important. For example, propaganda can depend on relationships between different
+parts of a text rather than on individual words alone. Ahmad et al.\ used a
+hierarchical graph-based model to capture such relationships in propaganda
+detection~\cite{ahmad2025}.
+
+\subsection{Multimodal Detection}
+Social media posts often contain more than one type of information. A post may
+contain text and an image together. Multimodal detection combines these different
+sources of information to make a prediction. Research has shown that image
+information can provide important clues for fake-news and hateful-meme
+detection~\cite{lin2024,hee2022}.
+
+\subsection{Behavioral and Network Signals}
+The behavior of a social-media account can also provide useful information.
+Examples include how often an account posts, how it interacts with other users, and
+whether it participates in coordinated activity. These signals can be useful when
+the actual content is difficult to trust or is deliberately changed to avoid
+detection~\cite{declerck2024,sela2025,schneider2026}.
+
+\subsection{Low-Resource Languages}
+A low-resource language is a language for which relatively few labeled datasets,
+language models, or other computational resources are available. Bengali is an
+example where researchers have identified limitations in annotated datasets and
+language resources~\cite{lora2023,hasan2026,romim2022}. This makes harmful-content
+detection more challenging than in high-resource languages such as English.
+
+\section{Literature Review}
+The reviewed literature focuses on computational methods for detecting propaganda,
+misinformation, manipulation, hate speech, sarcasm, and related harmful content.
+The studies cover traditional machine learning, deep learning, graph models,
+transfer learning, multimodal methods, behavioral analysis, and large language
+models (LLMs)~\cite{duridi2025,plikynas2025,ahmad2025,schneider2026}.
+
+The literature can be divided into two areas: \textbf{similar applications} and
+\textbf{related academic research}.
+
+\subsection{Similar Applications}
+Several existing tools and systems address parts of the problem of detecting
+misinformation, manipulated information, or suspicious online activity. These
+systems show that automated analysis can be provided through web-based interfaces
+and APIs, although they do not necessarily perform exactly the same task as the
+proposed system.
+\begin{itemize}
+  \item \textbf{Bot-detection and Coordination Analysis Systems:} Some systems
+        focus on identifying automated or coordinated social-media accounts.
+        Research-based systems such as those discussed by De~Clerck et al.\ analyze
+        account behavior and coordination patterns to identify bot-like
+        activity~\cite{declerck2024}. These systems are related to the proposed work
+        because they show how user behavior can be used in addition to the content
+        of a post.
+  \item \textbf{Fact-checking Systems:} Fact-checking platforms and services allow
+        users or applications to check whether claims have already been reviewed.
+        Google provides Fact Check Tools that support searching and working with
+        fact-check information through an API~\cite{google_factcheck}. Google also
+        supports the \texttt{ClaimReview} format for representing fact-check
+        results in a structured way~\cite{google_claimreview}. Such systems are
+        related because they support verification of questionable information,
+        although fact-checking is different from automatically detecting
+        propaganda techniques.
+  \item \textbf{Social-media Misinformation Analysis:} Other applications and
+        research systems analyze how information spreads through social networks.
+        The work of Sela et al.\ shows that repetition patterns and network
+        structures can provide signals for identifying political influence in
+        information spread~\cite{sela2025}. These systems are relevant because they
+        demonstrate that harmful information can be analyzed at both the content
+        level and the network level.
+  \item \textbf{Limitations of Existing Applications:} A common limitation of
+        existing applications is that they often focus on one specific problem,
+        such as fact checking, bot detection, or misinformation analysis. A system
+        that combines these ideas with low-resource language and multimodal
+        analysis can address a broader set of challenges.
+\end{itemize}
+
+\subsection{Related Research}
+
+\subsubsection*{Propaganda Detection Using Machine Learning and Deep Learning}
+Traditional machine learning remains useful for some propaganda detection tasks.
+Duridi et al.\ found that SVM performed better than AraBERT for propaganda
+detection in their Arabic social-media dataset, while AraBERT performed better for
+bias detection~\cite{duridi2025}. This result shows that the most advanced model is
+not always the best model for every task.
+
+Ahmad et al.\ proposed a Hierarchical Graph-based Integration Network (H-GIN) for
+propaganda detection. The model uses graph-based information to capture long-range
+and non-adjacent relationships that can be missed by standard sequence models. The
+study reported an accuracy of 82\% for its evaluated task~\cite{ahmad2025}.
+
+These studies show that both traditional and advanced models can be useful. The
+choice of model depends on the task, the dataset, and the type of information that
+needs to be captured.
+
+\subsubsection*{Behavioral and Network-Based Detection}
+Recent research has moved beyond text-only detection. De~Clerck et al.\ studied
+coordinated and bot-like behavior on Twitter and showed that patterns of account
+activity can help identify suspicious behavior~\cite{declerck2024}.
+
+Sela et al.\ also found that repetition patterns and network structure can provide
+useful signals for identifying political influence in information
+spread~\cite{sela2025}.
+
+Schneider et al.\ further developed this idea by focusing on user behavior rather
+than only the content of posts. In their Reddit study, behavioral-policy
+representations achieved a macro-F1 of 94.9\%, compared with 91.2\% for text
+embeddings in the evaluated actor-detection task~\cite{schneider2026}.
+
+These studies suggest that user behavior and network structure can provide
+information that cannot be obtained from text alone.
+
+\subsubsection*{Low-Resource Language Detection}
+Low-resource languages face important challenges because of limited data and
+language resources. Haider et al.\ studied manipulation detection in low-resource
+languages and showed that transfer learning can help when only a small amount of
+training data is available in the target language~\cite{haider2020}.
+
+For Bengali, Lora et al.\ developed a transformer-based model for sarcasm
+detection. Their results differed across datasets, showing that model performance
+can depend strongly on the characteristics of the available corpus~\cite{lora2023}.
+
+Romim et al.\ introduced the BD-SHS benchmark dataset for Bangla hate-speech
+detection. The dataset contains manually annotated comments from different social
+contexts, and the study reported a best F1-score of 91.0\% for its evaluated
+system~\cite{romim2022}.
+
+More recent work by Hasan et al.\ introduced BanglaMultiHate, which considers
+several aspects of hate speech, including type, severity, and target. The study
+evaluated classical machine learning, BanglaBERT, and LLM-based
+approaches~\cite{hasan2026}.
+
+Together, these studies show that successful moderation in Bangla requires larger
+datasets, better annotation, and models that understand local language and social
+context.
+
+\subsubsection*{Multimodal Detection}
+Lin et al.\ proposed a text-image fusion model for fake-news detection. Their
+results demonstrate that combining text and image information can improve detection
+compared with using only one modality~\cite{lin2024}.
+
+Hee et al.\ studied multimodal hateful memes and found that images can provide
+important information for classification. However, they also observed that
+multimodal systems may learn unwanted biases and produce false
+positives~\cite{hee2022}.
+
+Wang et al.\ investigated image-based political propaganda and showed that visual
+elements such as colors can be used in different ways by political
+groups~\cite{wang2022}.
+
+These findings suggest that text-only systems may miss important visual
+information. Therefore, multimodal analysis is an important direction for future
+harmful-content detection.
+
+\subsubsection*{Large Language Models}
+Large language models are a newer research direction in propaganda detection.
+Pi\~na-Garc\'ia used few-shot LLaMA~3.2 to classify propagandistic tweets and
+examine linguistic and coordination patterns in Mexican election-related
+data~\cite{pina2025}.
+
+Gaeta et al.\ proposed an LLM-based system that detects propaganda and identifies
+the specific parts of a text that contain propagandistic content~\cite{gaeta2025}.
+
+However, LLM performance depends strongly on data quality. Maarouf et al.\ showed
+that models trained with weak labels achieved an AUC of 64.03, whereas models
+trained with high-quality human annotations achieved an AUC of 92.25. Prompt-based
+learning with a smaller set of high-quality samples achieved an AUC of
+80.27~\cite{maarouf2024}.
+
+This indicates that better models alone are not enough. High-quality training and
+evaluation data are also essential.
+
+\subsection{Summary of Literature}
+\label{sec:lit-summary}
+Table~\ref{tab:litsummary} provides a systematic comparative summary of the
+reviewed literature, outlining the core computational methods, benchmark datasets,
+key findings, and critical limitations of prior work.
+
+\begingroup
+\small
+\setlength{\tabcolsep}{4pt}
+\renewcommand{\arraystretch}{1.25}
+\begin{longtable}{@{}L{3.1cm}C{0.8cm}L{2.2cm}L{3.5cm}L{3.3cm}@{}}
+\caption{Summary of related research papers.}\label{tab:litsummary}\\
+\toprule
+\textbf{Paper Title \& Citation} & \textbf{Year} & \textbf{Dataset Used} & \textbf{Key Methodology \& Findings} & \textbf{Critical Limitations}\\
+\midrule
+\endfirsthead
+\multicolumn{5}{@{}l}{\small\itshape Table~\thetable\ (continued)}\\
+\toprule
+\textbf{Paper Title \& Citation} & \textbf{Year} & \textbf{Dataset Used} & \textbf{Key Methodology \& Findings} & \textbf{Critical Limitations}\\
+\midrule
+\endhead
+\midrule
+\multicolumn{5}{r@{}}{\small\itshape Continued on next page}\\
+\endfoot
+\bottomrule
+\endlastfoot
+
+\textbf{Spread of propaganda by coordinated communities on social media}~\cite{hristakieva2022} & 2022 & Twitter (Italian elections \& COVID-19) &
+Analyzed coordinated link-sharing networks and bot behavior using network graphs. Found that propaganda spreaders exhibit significantly higher coordination than benign users. &
+Evaluated only on high-resource languages (Italian/English); text semantics were secondary to network topology; lacks multimodal analysis.\\
+\addlinespace
+\textbf{BanFakeNews: A dataset for detecting fake news in Bangla}~\cite{hossain2020} & 2020 & BanFakeNews (50,000 Bangla news articles) &
+Landmark benchmark Bangla dataset for fake news detection; evaluated SVM, Random Forest, and LSTM architectures. &
+Focuses strictly on factual veracity (fake vs.\ real) rather than rhetorical propaganda techniques; purely text-based without social context or coordination tracking.\\
+\addlinespace
+\textbf{BanMANI: Manipulated social media news in Bangla}~\cite{kamruzzaman2023} & 2023 & BanMANI (social media news posts) &
+Categorizes social media news manipulation into multiple classes; demonstrates the efficacy of transfer learning. &
+Small dataset size; does not analyze coordinated amplification campaigns or image--text multimodal relationships.\\
+\addlinespace
+\textbf{Coordinated information campaigns on social media}~\cite{ng2023} & 2023 & Twitter / Reddit multi-domain data &
+Multi-faceted framework fusing semantic similarity, temporal proximity, and network clustering to detect coordinated operations. &
+Computationally intensive; designed primarily for English; relies on extensive historical user activity graphs often unavailable in low-resource contexts.\\
+\addlinespace
+\textbf{Propaganda and bias in social media: Israel--Gaza war}~\cite{duridi2025} & 2025 & Arabic X (Twitter) posts &
+Evaluated classical ML (SVM) against deep learning (AraBERT); SVM achieved superior performance on propaganda classification while AraBERT excelled at bias detection. &
+Restricted to short text posts; does not address multimodal memes or cross-platform campaign coordination.\\
+\addlinespace
+\textbf{Hierarchical graph-based integration network for propaganda detection}~\cite{ahmad2025} & 2025 & SemEval propaganda corpus (English) &
+H-GIN model capturing long-range, non-adjacent token relationships via graph neural networks; reported 82\% accuracy. &
+Operates solely on English long-form news articles; high graph construction latency; no support for low-resource or code-mixed text.\\
+\addlinespace
+\textbf{Text-image multimodal fusion for fake news detection}~\cite{lin2024} & 2024 & Weibo \& Twitter multimodal benchmarks &
+Cross-modal attention network fusing visual features (ResNet/ViT) with textual embeddings (BERT); showed multimodal fusion outperforms unimodal baselines. &
+Evaluated on Chinese and English benchmarks; vulnerable to false positives when meme text and images are intentionally incongruent.\\
+\addlinespace
+\textbf{Explaining multimodal hateful meme detection models}~\cite{hee2022} & 2022 & Facebook Hateful Memes dataset &
+Investigates multimodal interpretability; reveals that multimodal models frequently latch onto background image biases and surface textual heuristics. &
+Demonstrates explainability challenges; lacks application to political propaganda in South Asian contexts.\\
+\addlinespace
+\textbf{Beyond content: Behavioral policies reveal actors in information operations}~\cite{schneider2026} & 2026 & Twitter \& Reddit coordinated influence sets &
+Models user behavioral policies (posting timing, activity patterns) reaching 94.9\% macro-F1, outperforming text embeddings (91.2\%). &
+Requires rich temporal account metadata; unviable for anonymous or newly created ephemeral accounts.\\
+\addlinespace
+\textbf{BD-SHS: Benchmark dataset for online Bangla hate speech}~\cite{romim2022} & 2022 & BD-SHS (Bangla social comments) &
+Diverse benchmark across multiple social categories; achieved 91.0\% F1-score using transformer fine-tuning. &
+Focuses on abusive language rather than persuasive propaganda techniques; lacks coordination and image features.\\
+\addlinespace
+\textbf{LLM-based multi-task Bangla hate speech detection}~\cite{hasan2026} & 2026 & BanglaMultiHate dataset &
+Multi-task framework evaluating classical ML, BanglaBERT, and few-shot LLMs across hate speech type, severity, and target. &
+Shows that while LLMs are promising, domain-specialized models (BanglaBERT) often yield superior and more consistent F1 on local cultural nuances.\\
+\addlinespace
+\textbf{HQP: A human-annotated dataset for detecting online propaganda}~\cite{maarouf2024} & 2024 & HQP (English articles) &
+Proves data quality impact: weak labels gave 64.03 AUC, whereas human-annotated data achieved 92.25 AUC. Prompt-learning with small verified sets achieved 80.27 AUC. &
+English-only; underscores the vital necessity of human verification over pure LLM automated annotation.\\
+\end{longtable}
+\endgroup
+
+\section{Gap Analysis}
+The reviewed literature shows several important gaps that can be addressed by the
+proposed work:
+
+\subsection{Gap 1: Limited Support for Low-Resource Languages}
+Many existing systems are developed and tested mainly on high-resource languages.
+Research on Bengali and Bangla shows that limited annotated datasets and language
+resources remain major problems~\cite{lora2023,hasan2026,romim2022}. More work is
+needed on systems that can effectively handle low-resource languages.
+
+\subsection{Gap 2: Heavy Dependence on Text}
+Many detection systems focus mainly on textual information. However, social-media
+content often includes images, and important information may appear in the
+relationship between text and images~\cite{lin2024,hee2022}. This creates a need
+for systems that can analyze multiple modalities together.
+
+\subsection{Gap 3: Limited Use of Behavioral Information}
+Traditional content-based systems may fail when users intentionally change or
+disguise their language. Behavioral and network-based research shows that user
+activity and coordination can provide additional
+evidence~\cite{declerck2024,sela2025,schneider2026}. However, these signals are not
+always integrated with text and multimodal models.
+
+\subsection{Gap 4: Data Quality and Annotation Problems}
+The quality of the training data has a strong effect on model performance. HQP
+demonstrates that high-quality human annotation can produce much better results
+than weak labeling~\cite{maarouf2024}. Bangla research also emphasizes the
+importance of culturally grounded and socially diverse
+datasets~\cite{hasan2026,romim2022}.
+
+\subsection{Gap 5: Generalization Across Datasets and Domains}
+A model can perform well on one dataset but perform differently on another dataset.
+The reviewed literature therefore indicates the need for evaluation across multiple
+datasets, domains, and languages rather than relying on a single
+benchmark~\cite{ahmad2025}.
+
+\subsection{Gap 6: Explainability}
+Many machine-learning and deep-learning systems provide a final classification
+without clearly explaining why a particular post was detected as harmful. This can
+be especially problematic for propaganda, sarcasm, memes, and culturally sensitive
+content. More interpretable systems are therefore
+needed~\cite{ahmad2025,hee2022,maarouf2024}.
+
+\subsection{Proposed Research Opportunity}
+Based on these gaps, there is an opportunity to develop a system that combines
+multiple types of evidence. Such a system could use text analysis together with
+image information and, where available, behavioral or network signals. For a
+low-resource language such as Bangla, the system could also use language-specific
+pretrained models and carefully annotated local datasets.
+
+The main focus should therefore be on building a detection approach that is not
+dependent on a single signal or a single dataset. It should be evaluated for
+accuracy, robustness, and generalization across different types of online content.
+
+\section{Summary}
+This chapter presented the background concepts needed to understand propaganda and
+harmful-content detection. It discussed machine learning, deep learning,
+graph-based approaches, multimodal analysis, behavioral signals, and the challenges
+of low-resource languages.
+
+The literature review showed that researchers are moving from text-only systems
+toward approaches that combine content, user behavior, network structure, images,
+and large language models~\cite{duridi2025,plikynas2025,lora2023,hasan2026,ahmad2025,lin2024,hee2022,declerck2024,sela2025,schneider2026,romim2022,haider2020,wang2022,pina2025,gaeta2025,maarouf2024}.
+The studies also show that no single method works equally well for every task.
+Model performance depends on the problem, the dataset, the available language
+resources, and the quality of annotation.
+
+The gap analysis identified several areas that still need improvement, especially
+low-resource language support, multimodal analysis, behavioral information, data
+quality, cross-dataset evaluation, and explainability. These gaps provide the
+motivation for developing a more integrated detection system that can work with
+low-resource and multimodal social-media content.
+
+% =====================================================================
+%                            CHAPTER 3
+% =====================================================================

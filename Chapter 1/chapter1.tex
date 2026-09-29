@@ -1,0 +1,208 @@
+\chapter{Introduction}
+\label{ch:intro}
+
+This chapter presents an overview of the proposed research on coordinated
+propaganda detection in Bangla digital media. It outlines the project background,
+problem statement, core motivation, research objectives, methodology, expected
+outcomes, and the structural organization of the report.
+
+\section{Project Overview}
+Bangladesh's digital media ecosystem has become a major source of information for
+millions of people, alongside continued growth in internet access and social media
+use. According to DataReportal's \emph{Digital 2025: Bangladesh}, the country had
+\textbf{77.7 million internet users} and \textbf{60.0 million social media user
+identities} in early 2025, demonstrating how strongly online platforms now shape
+news circulation and public opinion.
+
+Within this environment, \textbf{propaganda} refers to strategically crafted
+information designed to influence public attitudes, beliefs, or actions. In the
+digital age, such content is often spread through coordinated campaigns, repeated
+messaging, and networked amplification, making it more scalable and harder to
+detect than isolated misinformation. This issue is especially important in
+Bangladesh, where online platforms are deeply embedded in political communication,
+election-related discourse, and reactions to controversial events, all of which
+increase the potential impact of coordinated influence operations~\cite{hristakieva2022}.
+
+\subsection*{Problem Statement}
+Most automated propaganda detection systems to date have been developed for English
+and other languages with abundant digital resources. Bangla, by contrast, still
+lacks large annotated datasets and detection frameworks capable of identifying
+coordinated propaganda across text, images, and cross-platform activity, which
+leaves a substantial research and practical gap~\cite{hossain2020}. This project
+responds to that gap by proposing a Bangla propaganda dataset and an AI-based
+detection framework tailored to Bangladesh's online media environment. The goal is
+to support more accurate, scalable, and context-sensitive detection of coordinated
+propaganda campaigns in Bangla-language digital spaces~\cite{hossain2020,kamruzzaman2023}.
+
+\section{Motivation}
+The motivation for this project extends beyond building a detection system. In an
+increasingly digital society, people rely on online information to understand
+current events, form opinions, and make decisions that affect their communities and
+democratic processes. When coordinated propaganda manipulates information at scale,
+it can undermine public trust, distort discourse, and reduce people's ability to
+make informed judgments~\cite{hristakieva2022}.
+
+This project is grounded in the belief that individuals should be able to think
+independently rather than have their perceptions shaped by coordinated
+manipulation. Supporting that independence requires a digital environment in which
+misleading influence campaigns can be identified and examined more effectively.
+Technology alone cannot eliminate propaganda, but it can provide tools that improve
+transparency and help users evaluate online content more critically~\cite{ng2023}.
+
+From a research standpoint, the scarcity of Bangla-language resources for this task
+presents an opportunity. Existing Bangla work has already shown the value of
+annotated datasets and benchmark systems for low-resource language processing, and
+the same need extends to multimodal and propaganda-oriented settings. In this way,
+the project aims to contribute both to advances in AI research and to a more
+trustworthy online information ecosystem in Bangladesh~\cite{hossain2020}.
+
+\section{Objectives}
+The primary purpose of this research is to build a foundational AI framework and
+dataset for the Bangla digital media environment that can effectively detect and
+analyze coordinated propaganda campaigns~\cite{ng2023}.
+
+As this research is currently in its initial phase, the specific objectives are
+enumerated below:
+\begin{enumerate}
+  \item \textbf{Create a large-scale, multimodal Bangla dataset:} Compile and
+        annotate a comprehensive dataset spanning diverse domains, such as politics
+        and news, including both textual and visual elements, using hybrid
+        annotation pipelines that combine human expertise with LLM assistance to
+        scale the process efficiently~\cite{hossain2020}.
+  \item \textbf{Develop an AI model for propaganda detection:} Architect and train
+        a multimodal machine learning framework optimized for the linguistic
+        nuances of Bangla to classify manipulative and propagandistic
+        content~\cite{hossain2020}.
+  \item \textbf{Analyze coordinated campaigns:} Combine semantic, temporal, and
+        network-level signals to detect organized, scalable influence operations
+        rather than isolated pieces of misinformation~\cite{ng2023}.
+  \item \textbf{Evaluate model performance:} Conduct baseline evaluations against
+        current state-of-the-art models, such as fine-tuned transformers and
+        cross-lingual models, to assess accuracy, scalability, and
+        context-sensitivity in the Bangladeshi digital landscape~\cite{hossain2020}.
+  \item \textbf{Establish open resources for future research:} Make the annotated
+        dataset and architectural findings accessible to the academic community to
+        support further advances in NLP, multimodal machine learning, and digital
+        media analysis for low-resource languages~\cite{hossain2020}.
+\end{enumerate}
+
+\section{Methodology}
+\label{sec:method-overview}
+To achieve these objectives, the research follows a structured, multi-phase
+methodology. Figure~\ref{fig:workflow} presents the complete pipeline at a glance:
+raw Bangla content is ingested and normalized, passed through a hybrid
+LLM-plus-human annotation stage to yield a verified multimodal dataset, and then
+processed by three parallel analysis streams (text, visual, and network) whose
+outputs are combined by a cross-modal campaign-fusion head and delivered through a
+web dashboard and monitoring API.
+\begin{figure}[H]
+\centering
+\begin{adjustbox}{max width=\textwidth,max height=0.85\textheight}
+\begin{tikzpicture}[
+  wfn/.style={rectangle,draw=black!70,rounded corners=2pt,align=center,
+              font=\small,minimum height=13mm,text width=34mm,inner sep=4pt},
+  wfsrc/.style ={wfn,fill=gray!10},
+  wfproc/.style={wfn,fill=blue!7,minimum height=20mm},
+  wfsto/.style ={wfn,fill=green!8},
+  wfout/.style ={wfn,fill=orange!10,text width=55mm},
+  stl/.style={rotate=90,anchor=south,font=\scriptsize\bfseries,align=center,text width=30mm},
+  wfgrp/.style={draw=black!45,dashed,rounded corners=4pt,inner sep=8pt}
+]
+% ---- Stage 1
+\node[wfsrc] (src)   at (-4.6,0)    {\textbf{Bangla Digital Media Sources}\\[2pt]{\scriptsize Facebook \quad Twitter/X \quad News Outlets}};
+\node[wfsrc] (clean) at (0,0)       {\textbf{Data Cleaning}\\[2pt]{\scriptsize Unicode Normalization}};
+\node[wfsrc] (annot) at (4.6,0)     {\textbf{Hybrid Annotation Pipeline}\\[2pt]{\scriptsize LLM Pre-Annotation\\+ Human Verification}};
+\node[wfsto] (ds)    at (0,-2.4)    {\textbf{Verified Multimodal Dataset}};
+\draw[flow] (src) -- (clean);
+\draw[flow] (clean) -- (annot);
+\draw[flow] (annot.south) |- (ds.east);
+\node[wfgrp,fit=(src)(clean)(annot)(ds)] (st1) {};
+\node[stl] at (st1.west) {1.\ Ingestion \& Preprocessing};
+
+% ---- Stage 2
+\node[wfproc] (txt) at (-4.6,-6.2) {\textbf{Text Stream}\\[2pt]{\scriptsize BanglaBERT / XLM-R\\Semantic \& Persuasive Cue Modeling}};
+\node[wfproc] (vis) at (0,-6.2)    {\textbf{Visual Stream}\\[2pt]{\scriptsize ResNet / ViT\\Image--Text Alignment \& Meme Analysis}};
+\node[wfproc] (net) at (4.6,-6.2)  {\textbf{Network Stream}\\[2pt]{\scriptsize Temporal Clustering\\Coordinated Account Interaction Graphs}};
+\node[wfgrp,fit=(txt)(vis)(net)] (st2) {};
+\node[stl] at (st2.west) {2.\ Multimodal AI Framework};
+
+% bus: dataset -> three streams
+\draw[line] (ds.south) -- (0,-4.4);
+\draw[line] (-4.6,-4.4) -- (4.6,-4.4);
+\draw[flow] (-4.6,-4.4) -- (txt.north);
+\draw[flow] (0,-4.4)    -- (vis.north);
+\draw[flow] (4.6,-4.4)  -- (net.north);
+
+% ---- Stage 3
+\node[wfout] (fuse) at (0,-9.8)  {\textbf{Cross-Modal Campaign\\Fusion Head}};
+\node[wfout] (out)  at (0,-11.7) {\textbf{Propaganda Category}\\{\scriptsize Confidence \& Technique}};
+\node[wfout] (dash) at (0,-13.6) {\textbf{Web Dashboard}\\{\scriptsize \& Monitoring API}};
+\draw[flow] (fuse) -- (out);
+\draw[flow] (out) -- (dash);
+\node[wfgrp,fit=(fuse)(out)(dash)] (st3) {};
+\node[stl] at (st3.west) {3.\ Synthesis \& User Deployment};
+
+% bus: three streams -> fusion
+\draw[line] (txt.south) -- (-4.6,-8.4) -- (0,-8.4);
+\draw[line] (net.south) -- (4.6,-8.4)  -- (0,-8.4);
+\draw[flow] (vis.south) -- (fuse.north);
+\end{tikzpicture}
+\end{adjustbox}
+\caption{Overall workflow of the proposed Bangla propaganda detection framework.}
+\label{fig:workflow}
+\end{figure}
+
+The workflow proceeds through five core phases~\cite{ng2023}:
+\begin{itemize}
+  \item \textbf{Data Collection and Integration:} Raw data containing text and
+        visual elements across politics, sports, and entertainment is
+        systematically gathered using automated web scrapers and validated
+        manually.
+  \item \textbf{Data Cleaning and Preprocessing:} Unstructured text is cleaned,
+        standardized, tokenized, and normalized into machine-readable formats
+        tailored for Bangla NLP tasks.
+  \item \textbf{Dataset Annotation and Construction:} A hybrid pipeline uses LLMs
+        for initial pre-annotation and span extraction, followed by human expert
+        verification to ensure label quality and reduce
+        bias~\cite{hossain2020}.
+  \item \textbf{Multimodal Model Development:} Semantic features, temporal metrics,
+        and social network structure are fused to pinpoint coordinated campaigns
+        rather than standalone posts~\cite{ng2023}.
+  \item \textbf{Evaluation and Comparative Analysis:} Benchmarks are run against
+        transformer architectures and cross-lingual models to measure real-world
+        performance on Bangladeshi digital media contexts~\cite{hossain2020}.
+\end{itemize}
+
+\section{Project Outcome}
+By the end of this phase of the research, the project is expected to deliver the
+following major concrete outputs~\cite{hossain2020}:
+\begin{itemize}
+  \item An annotated multimodal Bangla propaganda dataset covering multiple public
+        domains.
+  \item A trained AI framework designed for detecting coordinated digital
+        propaganda.
+  \item A comprehensive baseline evaluation comparing the proposed architecture
+        against state-of-the-art models.
+  \item Openly available dataset resources and benchmarks to foster future NLP and
+        multimodal research for under-resourced languages~\cite{hristakieva2022}.
+\end{itemize}
+
+\section{Organization of the Report}
+The remainder of this report is organized as follows:
+\begin{itemize}
+  \item \textbf{Chapter~\ref{ch:background} (Background):} Presents the necessary
+        preliminaries, reviews similar applications and related research, and
+        identifies the research gaps relevant to coordinated propaganda detection
+        in Bangla online media.
+  \item \textbf{Chapter~\ref{ch:design} (Project Design):} Describes the project
+        requirements, context diagram, data flow diagrams, user interface design,
+        detailed methodology, project plan, and task allocation.
+  \item \textbf{Chapter~\ref{ch:standards} (Standards and Design Constraints):}
+        Discusses the standards followed, realistic design constraints, cost
+        analysis, and the mapping of the project to complex engineering problem
+        solving and activity criteria.
+\end{itemize}
+
+% =====================================================================
+%                            CHAPTER 2
+% =====================================================================
