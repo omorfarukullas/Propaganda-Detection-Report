@@ -5,6 +5,7 @@
 % -------------------------------------------------
 
 \usepackage[a4paper,margin=1in,headheight=15pt]{geometry}
+\usepackage{iftex}
 \usepackage{graphicx}
 \usepackage{float}
 \usepackage{amsmath}
@@ -30,7 +31,7 @@
 \usepackage{adjustbox}
 
 % -------------------------------------------------
-% TikZ (used only for figures that have no PNG)
+% TikZ and PGF Gantt (all figures coded natively)
 % -------------------------------------------------
 
 \usepackage{tikz}
@@ -129,6 +130,13 @@
 % -------------------------------------------------
 
 \newcommand{\ck}{$\checkmark$}
+\ifXeTeX
+  \usepackage{fontspec}
+  \newfontfamily\banglafont{FreeSerif}[Script=Bengali]
+  \newcommand{\bn}[1]{{\banglafont #1}}
+\else
+  \newcommand{\bn}[1]{[Bangla text: \textit{ekhane bangla social media post ba khobor likhun\dots}]}
+\fi
 \newcommand{\ttl}{A Multimodal AI Framework for Detecting Coordinated Propaganda in Bangla Online Media Content}
 
 \hypersetup{pdftitle={\ttl},pdfauthor={Group 262-037, UIU}}
