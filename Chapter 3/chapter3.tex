@@ -101,12 +101,36 @@ and shows its relationship with external entities. The main external entities ar
 \end{enumerate}
 
 \begin{figure}[H]
-  \centering
-  \includegraphics[width=0.90\textwidth]{Chapter 3/Context Diagram.png}
-  \caption{Context diagram --- the proposed system acts as the central component
+\centering
+\begin{adjustbox}{max width=\textwidth}
+\begin{tikzpicture}
+% central system
+\node[draw=boxdraw,thick,fill=boxfill,rounded corners=6pt,minimum width=32mm,
+      minimum height=66mm,text width=26mm,align=center,font=\footnotesize\bfseries] (S) at (0,0)
+      {Bangla Propaganda Detection System};
+% external entities
+\node[ext] (U) at (-5.6, 2.2) {User};
+\node[ext] (R) at (-5.6,-2.2) {Researcher / Administrator};
+\node[ext] (L) at ( 5.6, 2.2) {LLM Service};
+\node[ext] (E) at ( 5.6,-2.2) {External Data Sources};
+
+% User <-> System
+\draw[flow] (-4.29, 2.65) -- node[lab,above,text width=25mm]{Bangla text} (-1.6, 2.65);
+\draw[flow] (-1.6, 1.75) -- node[lab,below,text width=25mm]{Detection result, category \& confidence} (-4.29, 1.75);
+% Researcher <-> System
+\draw[flow] (-4.29,-1.75) -- node[lab,above,text width=25mm]{Raw data, annotation decisions, training config} (-1.6,-1.75);
+\draw[flow] (-1.6,-2.65) -- node[lab,below,text width=25mm]{Dataset info, model results, metrics} (-4.29,-2.65);
+% System <-> LLM
+\draw[flow] ( 1.6, 2.65) -- node[lab,above,text width=25mm]{Cleaned sample \& annotation prompt} ( 4.29, 2.65);
+\draw[flow] ( 4.29, 1.75) -- node[lab,below,text width=25mm]{Suggested label, technique \& explanation} ( 1.6, 1.75);
+% External data -> System
+\draw[flow] ( 4.29,-2.2) -- node[lab,above,text width=25mm]{Raw Bangla text/images \& metadata} ( 1.6,-2.2);
+\end{tikzpicture}
+\end{adjustbox}
+\caption{Context diagram --- the proposed system acts as the central component
 connecting the user, research workflow, external datasets, and the LLM-based
 annotation assistant.}
-  \label{fig:context}
+\label{fig:context}
 \end{figure}
 
 % ---------------------------------------------------------------------
@@ -147,11 +171,55 @@ processes and data stores.
 \end{itemize}
 
 \begin{figure}[H]
-  \centering
-  \includegraphics[height=15cm,keepaspectratio]{Chapter 3/DFD.png}
-  \caption{Level~1 Data Flow Diagram (DFD) --- the dual-workflow architecture: the
+\centering
+\begin{adjustbox}{max width=\textwidth,max height=0.84\textheight}
+\begin{tikzpicture}
+% external entities (left)
+\node[ext]  (eds) at (-5.3,  0.0) {External Data Sources};
+\node[ext]  (llm) at (-5.3, -4.8) {LLM Service};
+\node[ext]  (res) at (-5.3, -7.2) {Researcher / Expert};
+\node[ext]  (usr) at (-5.3,-15.9) {End User};
+% processes (centre)
+\node[proc,text width=30mm] (p1) at (0,  0.0) {P1: Data Collection \& Management};
+\node[proc,text width=30mm] (p2) at (0, -2.4) {P2: Data Preprocessing};
+\node[proc,text width=30mm] (p3) at (0, -4.8) {P3: LLM Pre-Annotation};
+\node[proc,text width=30mm] (p4) at (0, -7.2) {P4: Human Verification};
+\node[proc,text width=30mm] (p5) at (0, -9.6) {P5: Model Training};
+\node[proc,text width=30mm] (p6) at (0,-12.9) {P6: Model Evaluation (uses test split of D3)};
+\node[proc,text width=30mm] (p7) at (0,-15.9) {P7: User Prediction};
+% data stores (right)
+\node[store,text width=26mm] (d1) at (5.3, -1.2) {D1: Raw Dataset};
+\node[store,text width=26mm] (d2) at (5.3, -3.6) {D2: Processed Dataset};
+\node[store,text width=26mm] (d3) at (5.3, -8.4) {D3: Human-Verified Dataset};
+\node[store,text width=26mm] (d4) at (5.3,-11.0) {D4: Trained Model (weights \& config)};
+\node[store,text width=26mm] (d5) at (5.3,-12.9) {D5: Evaluation Results};
+\node[ext]   (r2) at (5.3,-14.9) {Researcher / Expert};
+
+% ---- flows
+\draw[flow] (eds) -- node[lab,above]{Raw content} (p1);
+\draw[flow] (p1.east) -| (d1.north);
+\draw[flow] (d1.west) -| (p2.north);
+\draw[flow] (p2.east) -| (d2.north);
+\draw[flow] (d2.west) -| (p3.north);
+\draw[flow,<->] (p3.west) -- node[lab,above,text width=20mm]{Prompts \& suggestions} (llm.east);
+\draw[flow] (p3.south) -- node[lab,right]{Pre-annotated} (p4.north);
+\draw[flow,<->] (p4.west) -- node[lab,above,text width=20mm]{Review \& correct} (res.east);
+\draw[flow] (p4.east) -| (d3.north);
+\draw[flow] (d3.west) -| (p5.north);
+\draw[flow] (p5.east) -| (d4.north);
+\draw[flow] (d4.west) -| (p6.north);
+\draw[flow] (p6.east) -- (d5.west);
+\draw[flow] (d5.south) -- node[lab,right]{Results} (r2.north);
+\draw[flow] (d4.east) -- ++(0.9,0) |- (p7.east);
+\node[lab,above,text width=16mm] at (2.8,-15.9) {Inference weights};
+% user <-> P7
+\draw[flow] ($(usr.east)+(0,0.25)$) -- node[lab,above]{Bangla text} ($(p7.west)+(0,0.25)$);
+\draw[flow] ($(p7.west)-(0,0.25)$) -- node[lab,below,text width=22mm]{Prediction, category \& explanation} ($(usr.east)-(0,0.25)$);
+\end{tikzpicture}
+\end{adjustbox}
+\caption{Level~1 Data Flow Diagram (DFD) --- the dual-workflow architecture: the
 research and model-development pipeline and the end-user prediction workflow.}
-  \label{fig:dfd1}
+\label{fig:dfd1}
 \end{figure}
 
 \subsubsection{Detailed Level 2 Data Flow Diagram}
@@ -245,10 +313,32 @@ System}), a short explanation of the system purpose, a Bangla text input area, a
 ``Analyze'' button, and a result section.
 
 \begin{figure}[H]
-  \centering
-  \includegraphics[width=0.75\textwidth,height=12cm,keepaspectratio]{Chapter 3/UI design.png}
-  \caption{Main screen result interface.}
-  \label{fig:ui-main}
+\centering
+\begin{adjustbox}{max width=\textwidth}
+\begin{tikzpicture}[ui/.style={font=\footnotesize,anchor=west}]
+\draw[boxdraw,thick,rounded corners=4pt,fill=white] (-6.2,0) rectangle (6.2,-9.4);
+\node[font=\large\bfseries] at (0,-0.75) {Bangla Propaganda Detection System};
+\node[font=\footnotesize] at (0,-1.4) {Analyze Bangla digital content for persuasive \& propaganda cues};
+\draw[boxdraw] (-5.8,-1.85) -- (5.8,-1.85);
+
+\node[ui,font=\footnotesize\bfseries] at (-5.8,-2.4) {Enter Bangla Text:};
+\draw[gray,rounded corners=2pt,fill=gray!6] (-5.8,-2.75) rectangle (5.8,-4.55);
+\node[ui,text=gray] at (-5.6,-3.15) {\bn{এখানে বাংলা সোশ্যাল মিডিয়া পোস্ট বা খবর লিখুন\ldots}};
+
+\node[draw=boxdraw,fill=uiublue,text=white,rounded corners=3pt,minimum width=32mm,
+      minimum height=8mm,font=\footnotesize\bfseries] at (0,-5.3) {Analyze};
+\draw[boxdraw] (-5.8,-6.0) -- (5.8,-6.0);
+
+\node[ui,font=\footnotesize\bfseries] at (-5.8,-6.5) {Result:};
+\node[ui,anchor=north west,text width=11cm,align=left] at (-5.6,-6.9)
+  {\textbf{Prediction:} Propaganda Detected\\[2pt]
+   \textbf{Technique:} Loaded Language\\[2pt]
+   \textbf{Confidence:} Medium\\[2pt]
+   \textbf{Explanation:} The text contains emotionally strong wording that may influence the reader.};
+\end{tikzpicture}
+\end{adjustbox}
+\caption{Main screen result interface.}
+\label{fig:ui-main}
 \end{figure}
 
 \subsubsection*{Result Interface}
@@ -264,10 +354,39 @@ A separate interface is used by the researcher or annotator to support the LLM
 pre-annotation $\rightarrow$ human verification workflow.
 
 \begin{figure}[H]
-  \centering
-  \includegraphics[width=0.75\textwidth,height=12cm,keepaspectratio]{Chapter 3/Annotation Interface.png}
-  \caption{Annotation interface.}
-  \label{fig:ui-annot}
+\centering
+\begin{adjustbox}{max width=\textwidth}
+\begin{tikzpicture}[ui/.style={font=\footnotesize,anchor=west},
+                    b/.style={ui,font=\footnotesize\bfseries}]
+\draw[boxdraw,thick,rounded corners=4pt,fill=white] (-6.2,0) rectangle (6.2,-11.0);
+\node[font=\large\bfseries] at (0,-0.7) {Researcher / Annotator Interface};
+\draw[boxdraw] (-5.8,-1.2) -- (5.8,-1.2);
+
+\node[ui] at (-5.8,-1.7) {\textbf{Sample ID:} \#1042};
+\node[ui] at (-5.8,-2.3) {\textbf{Text:} ``\ldots'' (Bangla sample text)};
+
+\node[b] at (-5.8,-3.1) {LLM Suggested Label:};
+\node[ui,draw=boxdraw,fill=boxfill,inner sep=3pt] at (-2.2,-3.1) {Propaganda Detected};
+\node[b] at (-5.8,-3.8) {Suggested Technique:};
+\node[ui,draw=boxdraw,fill=boxfill,inner sep=3pt] at (-2.2,-3.8) {Fear Appeal};
+\node[b] at (-5.8,-4.5) {LLM Rationale:};
+\node[ui] at (-2.2,-4.5) {Mentions severe imminent societal threat};
+
+\node[b] at (-5.8,-5.4) {Human Decision:};
+\draw (-5.5,-6.0) circle (0.11);  \node[ui] at (-5.25,-6.0) {Accept LLM Suggestion};
+\draw (-5.5,-6.65) circle (0.11); \node[ui] (mod) at (-5.25,-6.65) {Modify Label:};
+\node[ui,draw=gray,inner sep=3pt,right=3mm of mod] {Select Technique $\blacktriangledown$};
+\draw (-5.5,-7.3) circle (0.11);  \node[ui] at (-5.25,-7.3) {Mark Ambiguous / Sarcastic};
+
+\node[b] at (-5.8,-8.05) {Annotator Notes:};
+\draw[gray,rounded corners=2pt,fill=gray!6] (-5.8,-8.35) rectangle (5.8,-9.35);
+
+\node[draw=boxdraw,fill=uiublue,text=white,rounded corners=3pt,minimum width=48mm,
+      minimum height=8mm,font=\footnotesize\bfseries] at (0,-10.2) {Confirm Ground Truth};
+\end{tikzpicture}
+\end{adjustbox}
+\caption{Annotation interface.}
+\label{fig:ui-annot}
 \end{figure}
 
 % ---------------------------------------------------------------------
@@ -688,7 +807,3 @@ sub-disciplines:
         experiments (E1--E6), confusion matrix error analysis, and web UI/API
         development.
 \end{itemize}
-
-% =====================================================================
-%                            CHAPTER 4
-% =====================================================================
